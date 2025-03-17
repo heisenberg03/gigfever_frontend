@@ -1,0 +1,111 @@
+Summary of Functionalities
+GigFever is designed as a platform connecting artists and event hosts, with features centered around event management, artist discovery, and user interaction. Here’s a detailed list of functionalities:
+
+Authentication:
+Phone + OTP Login: Users authenticate using a phone number and one-time password (implemented in AuthScreen.tsx).
+Session Management: Managed via authStore.ts in Zustand, storing user details (e.g., fullName, phoneNumber, isArtist).
+Navigation:
+Bottom Tab Navigation: Five tabs—Home, Events, Artists, Profile, Notifications—implemented using @react-navigation/bottom-tabs.
+Stack Navigation: Supports additional screens (Auth, EventDetails, EditProfile, Chat) via @react-navigation/stack.
+Data Fetching and Management:
+Apollo Client Integration: Fetches events, artists, invites, bookings, and applications from a dummy GraphQL backend (server.js) using queries defined in graphql/queries.ts.
+State Management:
+authStore.ts: Handles user session.
+notificationStore.ts: Manages notifications and unread counts.
+categoryStore.ts & subCategoryStore.ts: Store category and subcategory data.
+(Note: eventStore.ts and artistStore.ts were removed to rely on Apollo caching.)
+Event Management:
+Event Listing: EventListingScreen.tsx displays events with category/subcategory filters.
+Event Details: EventDetailsScreen.tsx (recently added) shows event specifics.
+Invites, Bookings, Applications: HomeScreen.tsx sections for artists (Invites, Bookings) and hosts (Applications, Upcoming Events).
+Artist Discovery:
+Artist Listing: ArtistListingScreen.tsx displays artists with filters.
+Trending Artists: HomeScreen.tsx includes a horizontal scroll for trending artists.
+User Profile:
+Profile Display: ProfileScreen.tsx (recently added) shows user info.
+Profile Editing: EditProfileScreen.tsx (recently added) allows name updates.
+Notifications:
+Notification Center: NotificationScreen.tsx (recently added) lists notifications.
+Unread Count: Displayed on the bell icon in the header (notificationStore.ts).
+Communication:
+Chat: ChatScreen.tsx (recently added) provides a basic chat interface with mock messages.
+UI Interactions:
+Header Animation: HomeScreen.tsx features a sliding header on scroll using react-native-reanimated.
+Action Buttons: ActionButton.tsx supports actions like Accept/Decline/Chat on invites/applications.
+Pending Features:
+Optimistic UI Updates: Not implemented (e.g., marking notifications read locally).
+Persistent Storage: No AsyncStorage integration yet.
+Real-Time Updates: Missing (e.g., WebSocket for chat).
+Summary of Screens
+The app includes the following screens, with their current status:
+
+AuthScreen.tsx
+Functionality: Phone number input and OTP verification for login.
+Status: Implemented with dummy auth flow; needs real backend integration.
+Navigation: Leads to MainTabs post-auth.
+HomeScreen.tsx
+Functionality: Dashboard with role-based sections:
+Artists: Invites, Upcoming Bookings.
+Hosts: Pending Applications, Upcoming Events.
+Trending Artists (horizontal scroll).
+Status: Partially functional; data rendering has a TypeError: Cannot read property 'title' of undefined due to network or schema issues. Header overlap persists.
+UI: Animated header, section titles, cards, and tabs.
+EventListingScreen.tsx
+Functionality: Lists events with search and category/subcategory filters.
+Status: Fully implemented with dummy data; navigation to EventDetails works.
+UI: Searchbar, horizontal filter scrolls, event cards.
+ArtistListingScreen.tsx
+Functionality: Lists artists with search and category/subcategory filters.
+Status: Fully implemented with dummy data; navigation to Profile (placeholder) works.
+UI: Searchbar, horizontal filter scrolls, artist cards.
+ProfileScreen.tsx
+Functionality: Displays user info (name, phone, role) with an Edit button.
+Status: Recently added with dummy data; navigation to EditProfile works.
+UI: Card-based profile view, button.
+NotificationScreen.tsx
+Functionality: Lists notifications from notificationStore.ts.
+Status: Recently added with dummy data; needs real notification fetching.
+UI: FlatList of notification cards.
+EventDetailsScreen.tsx
+Functionality: Displays event details based on eventId from navigation params.
+Status: Recently added with dummy data; needs optimization for large events.
+UI: Card with event info.
+EditProfileScreen.tsx
+Functionality: Allows editing of full name and display name, saves to authStore.ts.
+Status: Recently added; functional with dummy state updates.
+UI: Text inputs, save button.
+ChatScreen.tsx
+Functionality: Displays mock chat messages in a FlatList.
+Status: Recently added; needs real chat backend (e.g., WebSocket).
+UI: Inverted FlatList of message cards.
+Summary of UI Design
+The UI design leverages react-native-paper for a consistent Material Design aesthetic, with custom styles defined in each screen. Here’s a detailed breakdown:
+
+Color Scheme:
+Primary: #6B48FF (header, buttons).
+Background: #F5F5F5 (light gray for content areas).
+Text: #333 (dark gray for titles), #666 (medium gray for subtitles), #888 (light gray for details).
+Layout:
+Header: Appbar.Header with a sliding animation on HomeScreen.tsx using react-native-reanimated. Positioned absolutely with zIndex: 100, height ~56px.
+Content: Wrapped in ScrollView with paddingTop to avoid header overlap (recently adjusted with SafeAreaView).
+Sections: Organized with bold titles (18px) and spaced content (16px padding).
+Components:
+Cards: Used via Card from react-native-paper, with elevation: 2 for shadow, borderRadius: 8, and custom padding (12px).
+Buttons: ActionButton.tsx for actions (e.g., Accept, Decline), styled with TouchableOpacity and primary color.
+ArtistCard: Horizontal scroll item for trending artists, needs styling consistency.
+Tabs: Bottom tab bar with placeholder text icons (recently updated with Ionicons from @expo/vector-icons).
+Typography:
+Titles: 16-24px, bold, #333.
+Subtitles/Details: 12-16px, regular, #666/#888.
+No Data: 16px, #666, centered.
+Interactivity:
+Touch Feedback: TouchableOpacity for cards and buttons.
+Animation: Header slides up on scroll (>50px) with smooth timing.
+Disabled States: Added to prevent navigation on invalid data (e.g., !item.event).
+Responsive Design:
+Basic responsiveness with flex and padding, but not fully tested across devices.
+SafeAreaView added to handle notches/status bars.
+Known UI Issues:
+Header Overlap: Content hidden before scroll or on top due to paddingTop miscalculation.
+Card Styling: Inconsistent margins/spacing across screens.
+Icon Integration: Recent addition of Ionicons needs color/active state styling.

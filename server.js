@@ -23,6 +23,7 @@ const mockData = {
     { id: 'n1', message: 'New invite received', timestamp: '2025-03-16T10:00:00Z', type: 'general' },
     { id: 'n2', message: 'Chat from Priya', timestamp: '2025-03-16T11:00:00Z', type: 'chat', relatedId: 'c1' },
   ],
+  
 };
 
 // GraphQL Schema
