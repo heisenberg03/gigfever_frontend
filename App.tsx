@@ -2,15 +2,23 @@
 import React from 'react';
 import { PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
-import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink, from } from '@apollo/client';
+import { onError } from '@apollo/client/link/error';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useFetchCategories } from './src/stores/categoryStore';
 import { useFetchSubCategories } from './src/stores/subCategoryStore';
 import { useFetchNotifications } from './src/stores/notificationStore';
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors) console.log('GraphQL Errors:', graphQLErrors);
+  if (networkError) console.log('Network Error:', networkError);
+});
 
 const client = new ApolloClient({
-  link: new HttpLink({ uri: 'http://localhost:4000/graphql' }), // Replace with your IP
+  link: from([
+    errorLink,
+    new HttpLink({ uri: 'http://192.168.0.106:4000/graphql' }) // Replace with your IP
+  ]),
   cache: new InMemoryCache(),
 });
 

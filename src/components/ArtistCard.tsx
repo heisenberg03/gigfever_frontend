@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Title, Paragraph, Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { View } from 'react-native';
 
 interface ArtistCardProps {
   artist: { id: string; displayName: string; rating: number; reviewCount: number; subCategories: string[] };
