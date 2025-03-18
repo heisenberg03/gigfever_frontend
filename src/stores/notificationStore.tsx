@@ -1,52 +1,67 @@
+// src/stores/notificationStore.ts
 import { create } from 'zustand';
-import { gql, useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client';
+import { GET_NOTIFICATIONS } from '../graphql/queries';
+import { useAuthStore } from './authStore';
 import React from 'react';
-export const GET_NOTIFICATIONS = gql`query { notifications { id message timestamp type relatedId } }`;
 
-interface Notification {
-  id: string;
-  message: string;
-  timestamp: string;
-  type: 'general' | 'chat';
-  relatedId?: string; // e.g., eventId or chatId for navigation
-}
-
+// Define the store interface
 interface NotificationState {
-  generalUnreadCount: number;
-  chatUnreadCount: number;
-  notifications: Notification[];
-  incrementGeneral: () => void;
-  incrementChat: () => void;
-  addNotification: (notification: Notification) => void;
-  clearUnread: (type: 'general' | 'chat') => void;
+  notifications: Array<{
+    id: string;
+    message: string;
+    timestamp: string;
+    type: string;
+    relatedId: string;
+    read: boolean;
+  }>;
+  unreadCount: number;
+  setNotifications: (notifications: NotificationState['notifications']) => void;
+  markAsRead: (notificationId: string) => void;
+  fetchNotifications: () => void;
 }
 
-export const useFetchNotifications = () => {
-  const { data } = useQuery(GET_NOTIFICATIONS, { fetchPolicy: 'cache-first' });
-  const addNotification = useNotificationStore((state) => state.addNotification);
-  React.useEffect(() => {
-    if (data) {
-      data.notifications.forEach((n) => addNotification(n));
-    }
-  }, [data, addNotification]);
-};
-
-
-export const useNotificationStore = create<NotificationState>((set) => ({
-  generalUnreadCount: 0,
-  chatUnreadCount: 0,
+// Create the store
+export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
-  incrementGeneral: () => set((state) => ({ generalUnreadCount: state.generalUnreadCount + 1 })),
-  incrementChat: () => set((state) => ({ chatUnreadCount: state.chatUnreadCount + 1 })),
-  addNotification: (notification) =>
-    set((state) => ({
-      notifications: [...state.notifications, notification],
-      ...(notification.type === 'general' ? { generalUnreadCount: state.generalUnreadCount + 1 } : {}),
-      ...(notification.type === 'chat' ? { chatUnreadCount: state.chatUnreadCount + 1 } : {}),
-    })),
-  clearUnread: (type) =>
-    set((state) => ({
-      ...(type === 'general' ? { generalUnreadCount: 0 } : {}),
-      ...(type === 'chat' ? { chatUnreadCount: 0 } : {}),
-    })),
+  unreadCount: 0,
+  setNotifications: (notifications) =>
+    set((state) => {
+      const unread = notifications.filter((n) => !n.read).length;
+      return { notifications, unreadCount: unread };
+    }),
+  markAsRead: (notificationId) =>
+    set((state) => {
+      const updatedNotifications = state.notifications.map((n) =>
+        n.id === notificationId ? { ...n, read: true } : n
+      );
+      const unread = updatedNotifications.filter((n) => !n.read).length;
+      return { notifications: updatedNotifications, unreadCount: unread };
+    }),
+  fetchNotifications: () => {
+    const { user } = useAuthStore();
+    if (!user) return; // Skip if no user is authenticated
+
+    const { data, error } = useQuery(GET_NOTIFICATIONS, {
+      variables: { userId: user.id },
+      skip: !user, // Only fetch if user is authenticated
+    });
+
+    if (error) {
+      console.log('Notification Fetch Error:', error.message);
+      return;
+    }
+
+    if (data?.notifications) {
+      get().setNotifications(data.notifications.map((n) => ({ ...n, read: false }))); // Initialize as unread
+    }
+  },
 }));
+
+// Custom hook to fetch notifications (used in AppNavigator)
+export const useFetchNotifications = () => {
+  const fetchNotifications = useNotificationStore((state) => state.fetchNotifications);
+  React.useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+};

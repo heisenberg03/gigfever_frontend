@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, Modal } from 'react-native';
 import { Button, Card } from 'react-native-paper';
 import { useQuery, useMutation } from '@apollo/client';
 import { useAuthStore } from '../stores/authStore';

@@ -6,9 +6,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink, from } from '@ap
 import { onError } from '@apollo/client/link/error';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
-import { useFetchCategories } from './src/stores/categoryStore';
-import { useFetchSubCategories } from './src/stores/subCategoryStore';
-import { useFetchNotifications } from './src/stores/notificationStore';
+
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) console.log('GraphQL Errors:', graphQLErrors);
   if (networkError) console.log('Network Error:', networkError);
@@ -20,6 +18,10 @@ const client = new ApolloClient({
     new HttpLink({ uri: 'http://192.168.0.106:4000/graphql' }) // Replace with your IP
   ]),
   cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: { fetchPolicy: 'cache-and-network' },
+    query: { errorPolicy: 'all' },
+  },
 });
 
 const theme = {
@@ -31,9 +33,6 @@ const theme = {
 };
 
 const AppContent: React.FC = () => {
-  useFetchCategories();
-  useFetchSubCategories();
-  useFetchNotifications();
   return <AppNavigator />;
 };
 

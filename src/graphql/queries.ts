@@ -142,3 +142,15 @@ export const GET_SUB_CATEGORIES = gql`
     }
   }
 `;
+
+export const GET_NOTIFICATIONS = gql`
+  query GetNotifications($userId: ID!) {
+    notifications(userId: $userId) {
+      id
+      message
+      timestamp
+      type
+      relatedId
+    }
+  }
+`;
