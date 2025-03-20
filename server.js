@@ -34,16 +34,67 @@ const typeDefs = gql`
     rating: Float!
     reviewCount: Int!
   }
+  type Location {
+    lat: Float!
+    lng: Float!
+    address: String!
+  }
+  type Budget {
+    min: Int!
+    max: Int!
+  }
+  type Host {
+    id: ID!
+    fullName: String!
+    rating: Float!
+    pastEventsCount: Int!
+    profilePic: String
+    reviews: [Review!]!
+  }
+  type Review {
+    id: ID!
+    reviewer: String!
+    rating: Int!
+    comment: String!
+  }
+  type Applicant {
+    id: ID!
+    fullName: String!
+    status: String!
+  }
+  type Artist {
+    id: ID!
+    fullName: String!
+  }
   type Event {
     id: ID!
     title: String!
-    category: String!
+    banner: String!
     date: String!
-    location: String!
-    host: User!
+    time: String!
+    location: Location!
+    type: String!
+    categories: [String!]!
+    subcategories: [String!]!
+    description: String!
+    budget: Budget!
+    host: Host!
+    applicants: [Applicant!]!
+    confirmedArtist: Artist
     status: String!
-    artists: [Artist!]!
+    userApplicationStatus: String
   }
+
+  input LocationInput {
+    lat: Float!
+    lng: Float!
+    address: String!
+  }
+  input BudgetInput {
+    min: Int!
+    max: Int!
+  }
+
   type Artist {
     id: ID!
     displayName: String!
@@ -103,6 +154,7 @@ const typeDefs = gql`
   type Query {
     categories: [Category!]!
     subCategories: [SubCategory!]!
+    event(id: ID!): Event
     events: [Event!]!
     artists: [Artist!]!
     invites: [Invite!]!
@@ -117,6 +169,18 @@ const typeDefs = gql`
   type Mutation {
     applyToEvent(eventId: ID!): Application!
     submitReview(eventId: ID!, rating: Float!, comment: String!): Review!
+     applyAsArtist(eventId: ID!): Applicant!
+    withdrawApplication(eventId: ID!): Boolean!
+    createEvent(
+      title: String!, type: String!, categories: [String!]!, subcategories: [String!]!,
+      date: String!, time: String!, location: LocationInput!, description: String!,
+      budget: BudgetInput!
+    ): Event!
+    updateEvent(
+      id: ID!, title: String, type: String, categories: [String], subcategories: [String],
+      date: String, time: String, location: LocationInput, description: String,
+      budget: BudgetInput
+    ): Event!
   }
 `;
 
