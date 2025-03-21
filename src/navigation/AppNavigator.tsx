@@ -18,9 +18,41 @@ import { useCategoryStore } from '../stores/categoryStore';
 import { useSubCategoryStore } from '../stores/subCategoryStore';
 import { gql, useQuery } from '@apollo/client';
 import { GET_NOTIFICATIONS } from '../graphql/queries';
+import OTPScreen from '../screens/OTPScreen';
+import ArtistProfileScreen from '../screens/ArtistProfileScreen';
+import CreateEditEventScreen from '../screens/CreateEditEventScreen';
+import { User } from '../types';
+
+export type RootStackParamList = {
+  AuthStack: undefined;
+  Auth: undefined;
+  OTPScreen: { phoneNumber: string};
+  Main: undefined;
+  App: undefined;
+  Artists: undefined;
+  Events: undefined;
+  ArtistProfile: { artistId: number };
+  EditProfile: { user: User };
+  EditPortfolio: undefined;
+  EventDetails: { eventId: string };
+  ChatConversation: { chatId: number; userName: string, profile_picture: string };
+  MyEvents: undefined;
+  MyBookings: undefined;
+  Notifications: undefined;
+  ManageEventApplications: { eventId: number };
+  LocationSelection: undefined;
+  ApplyForEvent: { eventId: number };
+  BookingInstructions: undefined;
+  ManageCategories: undefined;
+  Settings: undefined;
+  SearchScreen: undefined;
+  CreateEditEvent: undefined;
+  EventMediaManager: { eventId: number };
+  InviteArtist: { artistId: number };
+};
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 
 const MainTabs = () => (
   <Tab.Navigator screenOptions={{ headerShown: false }}>
@@ -45,9 +77,9 @@ const MainTabs = () => (
       options={{ tabBarIcon: ({ color }) => <Ionicons name="person" size={20} color={color} /> }}
     />
     <Tab.Screen
-      name="Notifications"
-      component={NotificationScreen}
-      options={{ tabBarIcon: ({ color }) => <Ionicons name="notifications" size={20} color={color} /> }}
+      name="Chat"
+      component={ChatScreen}
+      options={{ tabBarIcon: ({ color }) => <Ionicons name="chatbubbles-outline" size={20} color={color} /> }}
     />
   </Tab.Navigator>
 );
@@ -88,21 +120,46 @@ const MainApp = () => {
   }, [categoriesData, subCategoriesData, setCategories, setSubCategories]);
 
   return (
-    <>
-      <Stack.Screen name="Main" component={MainTabs} />
-      <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
-      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-      <Stack.Screen name="Chat" component={ChatScreen} />
-    </>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Main" component={MainTabs} />
+    <Stack.Screen name="Events" component={EventDetailsScreen} />
+    <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
+    <Stack.Screen name="CreateEditEvent" component={CreateEditEventScreen} />
+    <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+    <Stack.Screen name="Notifications" component={NotificationScreen} />
+    <Stack.Screen name="ArtistProfile" component={ArtistProfileScreen} />
+    <Stack.Screen name="Artists" component={ArtistListingScreen} />
+  </Stack.Navigator>
   );
 };
 
-export default function AppNavigator() {
-  const { user } = useAuthStore();
+const AuthStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Auth" component={AuthScreen} />
+    <Stack.Screen name="OTPScreen" component={OTPScreen} />
+  </Stack.Navigator>
+);
 
+
+export default function AppNavigator() {
+  const { user, setUser } = useAuthStore();
+  useEffect(() => {
+      setUser({
+        id: '1',
+        phoneNumber:'4',
+        username: 'testuser',
+        fullName: 'Test User',
+        displayName: 'Test User',
+        isArtist: true,
+      });
+  }, []);
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? <Stack.Screen name="MainApp" component={MainApp} /> : <Stack.Screen name="Auth" component={AuthScreen} />}
+      {user ? (
+        <Stack.Screen name="App" component={MainApp} />
+      ) : (
+        <Stack.Screen name="AuthStack" component={AuthStack} />
+      )}
     </Stack.Navigator>
   );
 }

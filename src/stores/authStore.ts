@@ -13,6 +13,7 @@
       socialLinks?: { [key: string]: string };
       categories?: string[];
       subCategories?: string[];
+      avgRating?: number;
     }
     
     interface AuthState {

@@ -40,11 +40,11 @@ const EventListingScreen = () => {
       <ScrollView horizontal style={styles.filterScroll}>
         {categories.map((cat) => (
           <TouchableOpacity
-            key={cat.name}
-            onPress={() => setSelectedCategory(cat.name === selectedCategory ? null : cat.name)}
-            style={[styles.filterButton, selectedCategory === cat.name && styles.filterButtonActive]}
+            key={cat}
+            onPress={() => setSelectedCategory(cat === selectedCategory ? null : cat)}
+            style={[styles.filterButton, selectedCategory === cat && styles.filterButtonActive]}
           >
-            <Text style={styles.filterText}>{cat.name}</Text>
+            <Text style={styles.filterText}>{cat}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

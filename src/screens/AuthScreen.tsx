@@ -1,32 +1,16 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../stores/authStore';
 
-const AuthScreen = () => {
+const AuthScreen = ({ navigation }: any) => {
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const { setUser } = useAuthStore();
-  const navigation = useNavigation();
 
   const handleSendOtp = () => {
     console.log('Sending OTP to', phoneNumber);
     setOtpSent(true);
-  };
-
-  const handleVerifyOtp = () => {
-    console.log('Verifying OTP', otp);
-    setUser({
-      id: '1',
-      phoneNumber,
-      username: 'testuser',
-      fullName: 'Test User',
-      displayName: 'Test User',
-      isArtist: false,
-    });
-    navigation.navigate('Home');
+    navigation.navigate('OTPScreen', { phoneNumber }); // Navigate to OTPScreen
   };
 
   return (
@@ -40,30 +24,14 @@ const AuthScreen = () => {
         keyboardType="phone-pad"
         placeholderTextColor="#888"
       />
-      {otpSent ? (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter OTP"
-            value={otp}
-            onChangeText={setOtp}
-            keyboardType="numeric"
-            placeholderTextColor="#888"
-          />
-          <Button mode="contained" onPress={handleVerifyOtp} style={styles.button}>
-            Verify OTP
-          </Button>
-        </>
-      ) : (
-        <Button
-          mode="contained"
-          onPress={handleSendOtp}
-          disabled={!phoneNumber}
-          style={styles.button}
-        >
-          Send OTP
-        </Button>
-      )}
+      <Button
+        mode="contained"
+        onPress={handleSendOtp}
+        disabled={!phoneNumber}
+        style={styles.button}
+      >
+        Send OTP
+      </Button>
     </View>
   );
 };

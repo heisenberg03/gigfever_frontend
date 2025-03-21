@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { Appbar, Card, Avatar, Tabs, TabScreen, Button } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@apollo/client';
 import { useAuthStore } from '../stores/authStore';
 import { GET_PORTFOLIO, GET_INVITES, GET_APPLICATIONS, GET_BOOKINGS, GET_EVENTS } from '../graphql/queries';
 import ReviewModal from '../components/ReviewModal';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({navigation}: any) => {
   const { user } = useAuthStore();
-  const navigation = useNavigation();
   const isArtist = user?.isArtist;
   const [showReviews, setShowReviews] = useState(false);
 
@@ -19,12 +17,12 @@ const ProfileScreen = () => {
   const { data: bookingsData } = useQuery(GET_BOOKINGS, { skip: !isArtist });
   const { data: eventsData } = useQuery(GET_EVENTS, { skip: isArtist });
 
-  const getCardStyle = (status) => ({
+  const getCardStyle = (status: 'confirmed' | 'cancelled' | 'past' | 'open' | 'draft') => ({
     confirmed: { borderColor: 'green' },
     cancelled: { borderColor: 'red' },
     past: { borderColor: 'gray' },
     open: { borderColor: 'blue' },
-    created: { borderColor: 'purple' },
+    draft: { borderColor: 'purple' },
   }[status] || {});
 
   return (
@@ -32,7 +30,7 @@ const ProfileScreen = () => {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={user?.displayName} />
-        <Appbar.Action icon="pencil" onPress={() => navigation.navigate('EditProfile')} />
+        <Appbar.Action icon="pencil" onPress={() => user && navigation.navigate('EditProfile', {user})} />
       </Appbar.Header>
       <ScrollView>
         <View style={{ padding: 16, alignItems: 'center' }}>

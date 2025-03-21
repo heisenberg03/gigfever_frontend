@@ -1,16 +1,14 @@
 import React from 'react';
-import { View, FlatList } from 'react-native';
+import { View, FlatList, Text } from 'react-native';
 import { Appbar, Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { NavigationProp } from '@react-navigation/native';
 import { useNotificationStore } from '../stores/notificationStore';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
 const NotificationScreen = () => {
-  const navigation = useNavigation();
-  const { notifications, clearUnread } = useNotificationStore();
-
-  React.useEffect(() => {
-    clearUnread('general'); // Clear unread count when screen is viewed
-  }, []);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { generalNotifications: notifications, markAsRead } = useNotificationStore();
 
   return (
     <View style={{ flex: 1 }}>
@@ -23,7 +21,7 @@ const NotificationScreen = () => {
         renderItem={({ item }) => (
           <Card
             style={{ margin: 8 }}
-            onPress={() => item.relatedId && navigation.navigate(item.type === 'chat' ? 'Chat' : 'EventDetails', { [item.type === 'chat' ? 'receiverId' : 'eventId']: item.relatedId })}
+            onPress={() => { item.relatedId && markAsRead(item.id) && navigation.navigate('EventDetails', { eventId: item.relatedId })}}
           >
             <Card.Content>
               <Text>{item.message}</Text>

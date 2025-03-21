@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Appbar, Card } from 'react-native-paper';
+import { Appbar, Card, IconButton, Badge } from 'react-native-paper';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@apollo/client';
 import { useAuthStore } from '../stores/authStore';
 import { useNotificationStore } from '../stores/notificationStore';
@@ -12,10 +11,9 @@ import ArtistCard from '../components/ArtistCard';
 
 const HEADER_HEIGHT = 56; // Match Appbar height
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}: any) => {
   const { user } = useAuthStore();
-  const { generalUnreadCount } = useNotificationStore();
-  const navigation = useNavigation();
+  const { unreadGeneralCount: generalUnreadCount } = useNotificationStore();
   const isArtist = user?.isArtist;
   const scrollY = useSharedValue(0);
 
@@ -77,10 +75,18 @@ const HomeScreen = () => {
           <Appbar.Action icon="magnify" color="#fff" onPress={() => navigation.navigate('Events')} />
           <Appbar.Action icon="map-marker" color="#fff" onPress={() => console.log('Location TBD')} />
           <Appbar.Action
-            icon="bell"
+            icon={({ size, color }) => (
+              <View>
+                <IconButton icon="bell" size={size} iconColor={color} />
+                {generalUnreadCount > 0 && (
+                  <Badge style={{ position: 'absolute', top: -8, right: -8 }}>
+                    {generalUnreadCount}
+                  </Badge>
+                )}
+              </View>
+            )}
             color="#fff"
             onPress={() => navigation.navigate('Notifications')}
-            badge={generalUnreadCount > 0 ? generalUnreadCount : undefined}
           />
         </Appbar.Header>
       </Animated.View>
