@@ -12,7 +12,7 @@ import ArtistCard from '../components/ArtistCard';
 const HEADER_HEIGHT = 56; // Match Appbar height
 
 const HomeScreen = ({navigation}: any) => {
-  const { user } = useAuthStore();
+  const { currentUser: user } = useAuthStore();
   const { unreadGeneralCount: generalUnreadCount } = useNotificationStore();
   const isArtist = user?.isArtist;
   const scrollY = useSharedValue(0);

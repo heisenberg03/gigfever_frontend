@@ -4,13 +4,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
 import EventListingScreen from '../screens/EventListingScreen';
 import ArtistListingScreen from '../screens/ArtistListingScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import AuthScreen from '../screens/AuthScreen';
 import EventDetailsScreen from '../screens/EventDetailsScreen';
-import EditProfileScreen from '../screens/EditProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
 import { useAuthStore } from '../stores/authStore';
 import { useNotificationStore } from '../stores/notificationStore';
@@ -22,11 +21,12 @@ import OTPScreen from '../screens/OTPScreen';
 import ArtistProfileScreen from '../screens/ArtistProfileScreen';
 import CreateEditEventScreen from '../screens/CreateEditEventScreen';
 import { User } from '../types';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 
 export type RootStackParamList = {
   AuthStack: undefined;
   Auth: undefined;
-  OTPScreen: { phoneNumber: string};
+  OTPScreen: { phoneNumber: string };
   Main: undefined;
   App: undefined;
   Artists: undefined;
@@ -55,38 +55,41 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
 
 const MainTabs = () => (
-  <Tab.Navigator screenOptions={{ headerShown: false }}>
-    <Tab.Screen
-      name="Home"
-      component={HomeScreen}
-      options={{ tabBarIcon: ({ color }) => <Ionicons name="home" size={20} color={color} /> }}
-    />
-    <Tab.Screen
-      name="Events"
-      component={EventListingScreen}
-      options={{ tabBarIcon: ({ color }) => <Ionicons name="calendar" size={20} color={color} /> }}
-    />
-    <Tab.Screen
-      name="Artists"
-      component={ArtistListingScreen}
-      options={{ tabBarIcon: ({ color }) => <Ionicons name="mic" size={20} color={color} /> }}
-    />
-    <Tab.Screen
-      name="Profile"
-      component={ProfileScreen}
-      options={{ tabBarIcon: ({ color }) => <Ionicons name="person" size={20} color={color} /> }}
-    />
-    <Tab.Screen
-      name="Chat"
-      component={ChatScreen}
-      options={{ tabBarIcon: ({ color }) => <Ionicons name="chatbubbles-outline" size={20} color={color} /> }}
-    />
-  </Tab.Navigator>
+  <ErrorBoundary>
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ tabBarIcon: ({ color }) => <Ionicons name="home" size={20} color={color} /> }}
+      />
+      <Tab.Screen
+        name="Events"
+        component={EventListingScreen}
+        options={{ tabBarIcon: ({ color }) => <Ionicons name="calendar" size={20} color={color} /> }}
+      />
+      <Tab.Screen
+        name="Artists"
+        component={ArtistListingScreen}
+        options={{ tabBarIcon: ({ color }) => <Ionicons name="mic" size={20} color={color} /> }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ tabBarIcon: ({ color }) => <Ionicons name="person" size={20} color={color} /> }}
+      />
+      <Tab.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={{ tabBarIcon: ({ color }) => <Ionicons name="chatbubbles-outline" size={20} color={color} /> }}
+      />
+    </Tab.Navigator>
+  </ErrorBoundary>
+
 );
 
 // Wrapper component to initialize stores after authentication
 const MainApp = () => {
-  const { user } = useAuthStore();
+  const { currentUser: user } = useAuthStore();
   const setNotifications = useNotificationStore((state) => state.setNotifications);
   const setCategories = useCategoryStore((state) => state.setCategories);
   const setSubCategories = useSubCategoryStore((state) => state.setSubCategories);
@@ -120,46 +123,44 @@ const MainApp = () => {
   }, [categoriesData, subCategoriesData, setCategories, setSubCategories]);
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="Main" component={MainTabs} />
-    <Stack.Screen name="Events" component={EventDetailsScreen} />
-    <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
-    <Stack.Screen name="CreateEditEvent" component={CreateEditEventScreen} />
-    <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-    <Stack.Screen name="Notifications" component={NotificationScreen} />
-    <Stack.Screen name="ArtistProfile" component={ArtistProfileScreen} />
-    <Stack.Screen name="Artists" component={ArtistListingScreen} />
-  </Stack.Navigator>
+    <ErrorBoundary>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="Events" component={EventDetailsScreen} />
+        <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
+        <Stack.Screen name="CreateEditEvent" component={CreateEditEventScreen} />
+        <Stack.Screen name="Notifications" component={NotificationScreen} />
+        <Stack.Screen name="ArtistProfile" component={ArtistProfileScreen} />
+        <Stack.Screen name="Artists" component={ArtistListingScreen} />
+      </Stack.Navigator>
+    </ErrorBoundary>
+
   );
 };
 
 const AuthStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="Auth" component={AuthScreen} />
-    <Stack.Screen name="OTPScreen" component={OTPScreen} />
-  </Stack.Navigator>
+  <ErrorBoundary>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Screen name="OTPScreen" component={OTPScreen} />
+    </Stack.Navigator>
+  </ErrorBoundary>
+
 );
 
 
 export default function AppNavigator() {
-  const { user, setUser } = useAuthStore();
-  useEffect(() => {
-      setUser({
-        id: '1',
-        phoneNumber:'4',
-        username: 'testuser',
-        fullName: 'Test User',
-        displayName: 'Test User',
-        isArtist: true,
-      });
-  }, []);
+  const { isAuthenticated } = useAuthStore();
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
-        <Stack.Screen name="App" component={MainApp} />
-      ) : (
-        <Stack.Screen name="AuthStack" component={AuthStack} />
-      )}
-    </Stack.Navigator>
+    <ErrorBoundary>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <Stack.Screen name="App" component={MainApp} />
+        ) : (
+          <Stack.Screen name="AuthStack" component={AuthStack} />
+        )}
+      </Stack.Navigator>
+    </ErrorBoundary>
+
   );
 }

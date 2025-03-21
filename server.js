@@ -25,6 +25,72 @@ const mockData = {
   ],
   
 };
+const dummyEvents = [
+  {
+    id: '1',
+    title: 'Rock Night',
+    dateTime: '2025-04-15T19:00:00Z', // Updated to ISO 8601 format
+    location: 'Mumbai',
+    status: 'Open',
+    bannerUrl: 'https://source.unsplash.com/600x400/?concert',
+    hostId: 'user1',
+    mapLink: 'https://maps.google.com/?q=Mumbai',
+    description: 'A night full of rock music with top local bands.',
+  },
+  {
+    id: '2',
+    title: 'Jazz Evening',
+    dateTime: '2025-05-02T20:00:00Z', // Updated to ISO 8601 format
+    location: 'Delhi',
+    status: 'Closed',
+    bannerUrl: 'https://source.unsplash.com/600x400/?jazz',
+    hostId: 'user1',
+    mapLink: 'https://maps.google.com/?q=Delhi',
+    description: 'Smooth jazz performances and cocktails.',
+  },
+  {
+    id: '3',
+    title: 'Indie Festival',
+    dateTime: '2025-06-10T18:00:00Z', // Updated to ISO 8601 format
+    location: 'Bangalore',
+    status: 'Draft',
+    bannerUrl: 'https://source.unsplash.com/600x400/?indie',
+    hostId: 'user2',
+    mapLink: 'https://maps.google.com/?q=Bangalore',
+    description: 'Draft event not yet published.',
+  },
+];
+
+const dummyPortfolio = [
+  {
+    id: 'p1',
+    bannerUrl: 'https://source.unsplash.com/400x400/?music',
+    type: 'image',
+    source: 'instagram',
+  },
+  {
+    id: 'p2',
+    bannerUrl: 'https://source.unsplash.com/400x400/?band',
+    type: 'image',
+    source: 'youtube',
+  },
+];
+
+const dummyBookings = [
+  {
+    id: 'b1',
+    event: dummyEvents[1],
+    status: 'confirmed',
+  },
+];
+
+const dummyInvites = [
+  {
+    id: 'i1',
+    event: dummyEvents[0],
+    status: 'pending',
+  },
+];
 
 // GraphQL Schema
 const typeDefs = gql`
@@ -51,12 +117,6 @@ const typeDefs = gql`
     profilePic: String
     reviews: [Review!]!
   }
-  type Review {
-    id: ID!
-    reviewer: String!
-    rating: Int!
-    comment: String!
-  }
   type Applicant {
     id: ID!
     fullName: String!
@@ -69,12 +129,24 @@ const typeDefs = gql`
   type Event {
     id: ID!
     title: String!
-    banner: String!
-    date: String!
-    time: String!
+    dateTime: String!
+    location: String!
+    status: String!
+    bannerUrl: String
+    type: String!
+    hostId: ID!
+    mapLink: String
+    description: String
+  }
+
+  type EventDetails {
+    id: ID!
+    title: String!
+    bannerUrl: String
+    dateTime: String!
     location: Location!
     type: String!
-    categories: [String!]!
+    categoryId: String!
     subcategories: [String!]!
     description: String!
     budget: Budget!
@@ -123,8 +195,9 @@ const typeDefs = gql`
   }
   type PortfolioItem {
     id: ID!
+    bannerUrl: String!
     type: String!
-    url: String!
+    source: String!
   }
   type ChatMessage {
     id: ID!
@@ -154,13 +227,13 @@ const typeDefs = gql`
   type Query {
     categories: [Category!]!
     subCategories: [SubCategory!]!
-    event(id: ID!): Event
-    events: [Event!]!
+    events: [Event]
+    myEvents: [Event]
+    portfolio: [PortfolioItem]
+    bookings: [Booking]
+    invites: [Invite]
     artists: [Artist!]!
-    invites: [Invite!]!
-    bookings: [Booking!]!
     applications: [Application!]!
-    portfolio: [PortfolioItem!]!
     chatMessages(receiverId: ID!): [ChatMessage!]!
     event(id: ID!): Event
     notifications: [Notification!]!
@@ -189,14 +262,21 @@ const resolvers = {
   Query: {
     categories: () => mockData.categories,
     subCategories: () => mockData.subCategories,
-    events: () => mockData.events,
     artists: () => mockData.artists,
-    invites: () => mockData.invites,
-    bookings: () => mockData.bookings,
     applications: () => mockData.applications,
-    portfolio: () => mockData.portfolio,
     chatMessages: (_, { receiverId }) => mockData.chatMessages,
     event: (_, { id }) => mockData.events.find((e) => e.id === id),
+    events: () => dummyEvents.filter(e => e.status === 'Open'),
+    myEvents: () => dummyEvents.filter(e => e.hostId === 'user1'),
+    portfolio: () => dummyPortfolio,
+    bookings: () => dummyBookings.map((booking) => ({
+      ...booking,
+      event: {
+        ...booking.event,
+        dateTime: booking.event.dateTime || new Date().toISOString(), // Fallback to current date/time
+      },
+    })),
+    invites: () => dummyInvites,
   },
   Mutation: {
     applyToEvent: (_, { eventId }) => ({

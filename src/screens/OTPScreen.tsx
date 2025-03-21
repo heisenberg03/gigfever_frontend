@@ -6,23 +6,28 @@ import { useAuthStore } from '../stores/authStore';
 const OTPScreen = ({ route, navigation }: any) => {
   const { phoneNumber } = route.params;
   const [otp, setOtp] = useState('');
-  const { setUser } = useAuthStore();
+  const { authenticate } = useAuthStore();
 
-  const handleVerifyOtp = () => {
-    console.log('Verifying OTP', otp);
-    // Just set the user - AppNavigator will handle the navigation
-    setUser({
-      id: '1',
-      phoneNumber,
-      username: 'testuser',
-      fullName: 'Test User',
-      displayName: 'Test User',
-      isArtist: false,
-    });
-    navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
+  const handleVerifyOtp = async () => {
+    try {
+      // Here you would normally make an API call to verify OTP
+      // For now, we'll simulate a successful verification
+      const mockToken = 'mock-jwt-token';
+      const mockUser = {
+        id: '1',
+        phone: phoneNumber,
+        username: 'testuser',
+        fullName: 'Test User',
+        isArtist: true,
+        category: 'Music',
+        subcategories: [],
+        portfolio: []
+      };
+
+      authenticate(mockUser, mockToken);
+    } catch (error) {
+      console.error('OTP verification failed:', error);
+    }
   };
 
   return (

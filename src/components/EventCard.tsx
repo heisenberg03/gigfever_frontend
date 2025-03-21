@@ -3,7 +3,7 @@ import { Card, Title, Paragraph } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
 interface EventCardProps {
-  event: { id: string; title: string; category: string; date: string; location: string };
+  event: { id: string; title: string; category: string; dateTime: string; location: string };
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event }) => {

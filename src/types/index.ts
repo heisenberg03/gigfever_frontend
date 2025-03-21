@@ -16,7 +16,7 @@ export interface User {
     id: string;
     title: string;
     category: string;
-    date: string;
+    dateTime: string;
     location: string;
     host: User;
     status: string;

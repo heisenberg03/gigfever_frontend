@@ -60,7 +60,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     }),
 
   fetchNotifications: () => {
-    const { user } = useAuthStore();
+    const { currentUser:user } = useAuthStore();
     if (!user) return;
 
     const { data, error } = useQuery(GET_NOTIFICATIONS, {
