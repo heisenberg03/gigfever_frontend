@@ -1,92 +1,123 @@
 import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { Text, Switch, Button, Avatar, Chip, Divider, useTheme } from 'react-native-paper';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Text, Avatar, Button, Card, useTheme } from 'react-native-paper';
 import { useAuthStore } from '../../stores/authStore';
 import EditProfileModal from './EditProfileScreen';
 import ReviewsModal from './ReviewsModal';
-import { MyEventsSection } from './MyEventsSection';
-import { PortfolioSection } from './PortfolioSection';
-import { BookingsSection } from './MyBookingsSection';
-import { InvitesSection } from './InvitesSection';
+import { useNavigation } from '@react-navigation/native';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const ProfileScreen = () => {
   const { currentUser, toggleArtistMode } = useAuthStore();
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
   const theme = useTheme();
+  const navigation = useNavigation();
 
   if (!currentUser) return null;
 
+  const handleNavigate = (screen: string) => {
+    navigation.navigate(screen as never);
+  };
+
+  const cardData = [
+    { title: 'My Portfolio', subtitle: 'Manage your portfolio', screen: 'PortfolioScreen', icon: 'images' }, // FontAwesome5
+    { title: 'My Bookings', subtitle: 'View your bookings', screen: 'BookingsScreen', icon: 'calendar-check' }, // FontAwesome5
+    { title: 'Invites', subtitle: 'Check your invites', screen: 'InvitesScreen', icon: 'envelope-open-text' }, // FontAwesome5
+    { title: 'My Events', subtitle: 'Manage your events', screen: 'MyEventsScreen', icon: 'calendar-alt' }, // FontAwesome5
+  ];
+
+  const renderCard = ({ item }: { item: { title: string; subtitle: string; screen: string; icon: string } }) => (
+    <TouchableOpacity onPress={() => handleNavigate(item.screen)} style={styles.cardWrapper}>
+      <Card style={styles.card}>
+        <Card.Content style={styles.cardContent}>
+          <FontAwesome5 name={item.icon} size={32} color={theme.colors.primary} style={styles.cardIcon} />
+          <View>
+            <Text variant="titleMedium" style={styles.cardTitle}>{item.title}</Text>
+            <Text variant="bodySmall" style={styles.cardSubtitle}>{item.subtitle}</Text>
+          </View>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
+  );
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <View style={{ padding: 16, alignItems: 'center' }}>
+      {/* Profile Header */}
+      <View style={styles.header}>
         <Avatar.Image size={100} source={{ uri: currentUser.profilePicture }} />
-        <Text variant="headlineMedium" style={{ marginTop: 8 }}>
+        <Text variant="headlineMedium" style={styles.name}>
           {currentUser.fullName}
         </Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          {currentUser.location}
+          {currentUser.location || 'Location not set'}
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16 }}>
-          <Text variant="bodyMedium">Show as Artist</Text>
-          <Switch
-            value={currentUser.isArtist}
-            onValueChange={toggleArtistMode}
-            style={{ marginLeft: 8 }}
-          />
-        </View>
-        {currentUser.isArtist && (
-          <View style={{ marginTop: 16, alignItems: 'center' }}>
-            <Text variant="titleMedium">Category</Text>
-            <Chip style={{ marginTop: 4 }}>{currentUser.category || 'Not set'}</Chip>
-            <Text variant="titleMedium" style={{ marginTop: 16 }}>
-              Subcategories
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
-              {currentUser.subcategories.map((sub, index) => (
-                <Chip key={index} style={{ margin: 4 }}>
-                  {sub}
-                </Chip>
-              ))}
-            </View>
-          </View>
-        )}
-        <View style={{ flexDirection: 'row', marginTop: 16 }}>
-          {currentUser.isArtist && (
-            <Button onPress={() => setShowReviews(true)}>
-              Artist Rating: {currentUser.artistRating?.toFixed(1) || '-'} (
-              {currentUser.artistReviewCount || 0})
-            </Button>
-          )}
-          <Button onPress={() => setShowReviews(true)}>
-            Host Rating: {currentUser.hostRating?.toFixed(1) || '-'} (
-            {currentUser.hostReviewCount || 0})
-          </Button>
-        </View>
         <Button
           mode="contained"
           onPress={() => setShowEditProfile(true)}
-          style={{ marginTop: 16 }}
+          style={styles.editButton}
         >
           Edit Profile
         </Button>
       </View>
-      <Divider />
-      <MyEventsSection />
-      {currentUser.isArtist && (
-        <>
-          <Divider />
-          <PortfolioSection />
-          <Divider />
-          <BookingsSection />
-          <Divider />
-          <InvitesSection />
-        </>
-      )}
+
+      {/* Card Grid */}
+      <View style={styles.cardContainer}>
+        {cardData.map((item) => renderCard({ item }))}
+      </View>
+
+      {/* Modals */}
       <EditProfileModal visible={showEditProfile} onClose={() => setShowEditProfile(false)} />
       <ReviewsModal visible={showReviews} onClose={() => setShowReviews(false)} />
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  name: {
+    marginTop: 8,
+  },
+  editButton: {
+    marginTop: 16,
+  },
+  cardContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  cardWrapper: {
+    width: '48%',
+    marginBottom: 16,
+  },
+  card: {
+    flex: 1,
+    height: 150,
+    justifyContent: 'center',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  cardContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardIcon: {
+    marginBottom: 8,
+  },
+  cardTitle: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    textAlign: 'center',
+    color: '#666',
+  },
+});
 
 export default ProfileScreen;

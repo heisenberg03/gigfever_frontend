@@ -22,6 +22,10 @@ import ArtistProfileScreen from '../screens/ArtistProfileScreen';
 import CreateEditEventScreen from '../screens/CreateEditEventScreen';
 import { User } from '../types';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { InvitesSection } from '../screens/profile/InvitesSection';
+import { BookingsSection } from '../screens/profile/MyBookingsSection';
+import { MyEventsSection } from '../screens/profile/MyEventsSection';
+import { PortfolioSection } from '../screens/profile/PortfolioSection';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -36,8 +40,10 @@ export type RootStackParamList = {
   EditPortfolio: undefined;
   EventDetails: { eventId: string };
   ChatConversation: { chatId: number; userName: string, profile_picture: string };
-  MyEvents: undefined;
-  MyBookings: undefined;
+  MyEventsScreen: undefined;
+  BookingsScreen: undefined;
+  PortfolioScreen: undefined;
+  InvitesScreen: undefined;
   Notifications: undefined;
   ManageEventApplications: { eventId: number };
   LocationSelection: undefined;
@@ -132,6 +138,10 @@ const MainApp = () => {
         <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="ArtistProfile" component={ArtistProfileScreen} />
         <Stack.Screen name="Artists" component={ArtistListingScreen} />
+        <Stack.Screen name="PortfolioScreen" component={PortfolioSection} />
+        <Stack.Screen name="BookingsScreen" component={BookingsSection} />
+        <Stack.Screen name="InvitesScreen" component={InvitesSection} />
+        <Stack.Screen name="MyEventsScreen" component={MyEventsSection} />
       </Stack.Navigator>
     </ErrorBoundary>
 
