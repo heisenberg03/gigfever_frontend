@@ -32,6 +32,8 @@ const dummyEvents = [
     dateTime: '2025-04-15T19:00:00Z', // Updated to ISO 8601 format
     location: 'Mumbai',
     status: 'Open',
+    category: 'Music',
+    subcategories: ['Rock'],
     bannerUrl: 'https://source.unsplash.com/600x400/?concert',
     hostId: 'user1',
     mapLink: 'https://maps.google.com/?q=Mumbai',
@@ -43,6 +45,8 @@ const dummyEvents = [
     dateTime: '2025-05-02T20:00:00Z', // Updated to ISO 8601 format
     location: 'Delhi',
     status: 'Closed',
+    category: 'Music',
+    subcategories: ['Jazz'],
     bannerUrl: 'https://source.unsplash.com/600x400/?jazz',
     hostId: 'user1',
     mapLink: 'https://maps.google.com/?q=Delhi',
@@ -54,6 +58,8 @@ const dummyEvents = [
     dateTime: '2025-06-10T18:00:00Z', // Updated to ISO 8601 format
     location: 'Bangalore',
     status: 'Draft',
+    category: 'Music',
+    subcategories: ['Indie'],
     bannerUrl: 'https://source.unsplash.com/600x400/?indie',
     hostId: 'user2',
     mapLink: 'https://maps.google.com/?q=Bangalore',
@@ -132,6 +138,8 @@ const typeDefs = gql`
     dateTime: String!
     location: String!
     status: String!
+    category: String!
+    subcategories: [String!]!
     bannerUrl: String
     type: String!
     hostId: ID!
