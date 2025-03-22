@@ -19,7 +19,6 @@ export interface UserProfile {
   isArtist: boolean;
   category: string | null;
   subcategories: string[];
-  portfolio: MediaItem[];
   artistRating?: number;
   artistReviewCount?: number;
   hostRating?: number;

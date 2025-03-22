@@ -12,7 +12,7 @@ import AuthScreen from '../screens/AuthScreen';
 import EventDetailsScreen from '../screens/EventDetailsScreen';
 import ChatScreen from '../screens/ChatScreen';
 import { useAuthStore } from '../stores/authStore';
-import { useNotificationStore } from '../stores/notificationStore';
+import { useFetchNotifications, useNotificationStore } from '../stores/notificationStore';
 import { useCategoryStore } from '../stores/categoryStore';
 import { useSubCategoryStore } from '../stores/subCategoryStore';
 import { gql, useQuery } from '@apollo/client';
@@ -22,10 +22,10 @@ import ArtistProfileScreen from '../screens/ArtistProfileScreen';
 import CreateEditEventScreen from '../screens/CreateEditEventScreen';
 import { User } from '../types';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { InvitesSection } from '../screens/profile/InvitesSection';
-import { BookingsSection } from '../screens/profile/MyBookingsSection';
+import { InvitesScreen } from '../screens/profile/InvitesScreen';
+import { BookingsScreen } from '../screens/profile/BookingsScreen';
 import { MyEventsSection } from '../screens/profile/MyEventsSection';
-import { PortfolioSection } from '../screens/profile/PortfolioSection';
+import { PortfolioScreen } from '../screens/profile/PortfolioScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -96,24 +96,9 @@ const MainTabs = () => (
 // Wrapper component to initialize stores after authentication
 const MainApp = () => {
   const { currentUser: user } = useAuthStore();
-  const setNotifications = useNotificationStore((state) => state.setNotifications);
   const setCategories = useCategoryStore((state) => state.setCategories);
   const setSubCategories = useSubCategoryStore((state) => state.setSubCategories);
-
-  // Fetch notifications (user-specific)
-  const { data: notificationsData, error: notificationsError } = useQuery(GET_NOTIFICATIONS, {
-    variables: { userId: user?.id }, // Pass user ID to query
-    skip: !user, // Skip if user is not authenticated
-  });
-
-  useEffect(() => {
-    if (notificationsData?.notifications) {
-      setNotifications(notificationsData.notifications);
-    }
-    if (notificationsError) {
-      console.log('Notifications Error:', notificationsError);
-    }
-  }, [notificationsData, notificationsError, setNotifications]);
+    useFetchNotifications();
 
   // Fetch categories and subcategories (global, no user dependency)
   const { data: categoriesData } = useQuery(gql`query { categories { id name } }`, { skip: !user });
@@ -138,9 +123,9 @@ const MainApp = () => {
         <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="ArtistProfile" component={ArtistProfileScreen} />
         <Stack.Screen name="Artists" component={ArtistListingScreen} />
-        <Stack.Screen name="PortfolioScreen" component={PortfolioSection} />
-        <Stack.Screen name="BookingsScreen" component={BookingsSection} />
-        <Stack.Screen name="InvitesScreen" component={InvitesSection} />
+        <Stack.Screen name="PortfolioScreen" component={PortfolioScreen} />
+        <Stack.Screen name="BookingsScreen" component={BookingsScreen} />
+        <Stack.Screen name="InvitesScreen" component={InvitesScreen} />
         <Stack.Screen name="MyEventsScreen" component={MyEventsSection} />
       </Stack.Navigator>
     </ErrorBoundary>

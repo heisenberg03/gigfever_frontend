@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import { useQuery } from '@apollo/client';
 import { GET_NOTIFICATIONS } from '../graphql/queries';
 import { useAuthStore } from './authStore';
 import React from 'react';
+import { useQuery } from '@apollo/client';
 
 type Notification = {
   id: string;
@@ -20,10 +20,10 @@ interface NotificationState {
   unreadMessageCount: number;
   setNotifications: (notifications: Notification[]) => void;
   markAsRead: (notificationId: string) => void;
-  fetchNotifications: () => void;
+  fetchNotifications: (notifications: Notification[]) => void;
 }
 
-export const useNotificationStore = create<NotificationState>((set, get) => ({
+export const useNotificationStore = create<NotificationState>((set) => ({
   generalNotifications: [],
   messageNotifications: [],
   unreadGeneralCount: 0,
@@ -31,14 +31,14 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   setNotifications: (notifications) =>
     set(() => {
-      const messageNotifs = notifications.filter(n => n.type === 'MESSAGE');
-      const generalNotifs = notifications.filter(n => n.type !== 'MESSAGE');
-      
+      const messageNotifs = notifications.filter((n) => n.type === 'MESSAGE');
+      const generalNotifs = notifications.filter((n) => n.type !== 'MESSAGE');
+
       return {
         messageNotifications: messageNotifs,
         generalNotifications: generalNotifs,
-        unreadMessageCount: messageNotifs.filter(n => !n.read).length,
-        unreadGeneralCount: generalNotifs.filter(n => !n.read).length,
+        unreadMessageCount: messageNotifs.filter((n) => !n.read).length,
+        unreadGeneralCount: generalNotifs.filter((n) => !n.read).length,
       };
     }),
 
@@ -54,34 +54,43 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       return {
         messageNotifications: updatedMessageNotifs,
         generalNotifications: updatedGeneralNotifs,
-        unreadMessageCount: updatedMessageNotifs.filter(n => !n.read).length,
-        unreadGeneralCount: updatedGeneralNotifs.filter(n => !n.read).length,
+        unreadMessageCount: updatedMessageNotifs.filter((n) => !n.read).length,
+        unreadGeneralCount: updatedGeneralNotifs.filter((n) => !n.read).length,
       };
     }),
 
-  fetchNotifications: () => {
-    const { currentUser:user } = useAuthStore();
-    if (!user) return;
+  fetchNotifications: (notifications) => {
+    set(() => {
+      const messageNotifs = notifications.filter((n) => n.type === 'MESSAGE');
+      const generalNotifs = notifications.filter((n) => n.type !== 'MESSAGE');
 
-    const { data, error } = useQuery(GET_NOTIFICATIONS, {
-      variables: { userId: user.id },
-      skip: !user,
+      return {
+        messageNotifications: messageNotifs,
+        generalNotifications: generalNotifs,
+        unreadMessageCount: messageNotifs.filter((n) => !n.read).length,
+        unreadGeneralCount: generalNotifs.filter((n) => !n.read).length,
+      };
     });
+  },
+}));
 
+export const useFetchNotifications = () => {
+  const fetchNotifications = useNotificationStore((state) => state.fetchNotifications);
+  const { currentUser: user } = useAuthStore();
+
+  const { data, error } = useQuery(GET_NOTIFICATIONS, {
+    variables: { userId: user?.id },
+    skip: !user,
+  });
+
+  React.useEffect(() => {
     if (error) {
       console.log('Notification Fetch Error:', error.message);
       return;
     }
 
     if (data?.notifications) {
-      get().setNotifications(data.notifications.map((n) => ({ ...n, read: false })));
+      fetchNotifications(data.notifications);
     }
-  },
-}));
-
-export const useFetchNotifications = () => {
-  const fetchNotifications = useNotificationStore((state) => state.fetchNotifications);
-  React.useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+  }, [data, error, fetchNotifications]);
 };
