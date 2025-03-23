@@ -13,6 +13,8 @@ export interface UserProfile {
   username: string;
   fullName: string;
   phone: string;
+  budget?: number;
+  email?: string;
   location?: string;
   profilePicture?: string;
   bio?: string;

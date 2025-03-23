@@ -14,9 +14,7 @@ import ChatScreen from '../screens/ChatScreen';
 import { useAuthStore } from '../stores/authStore';
 import { useFetchNotifications, useNotificationStore } from '../stores/notificationStore';
 import { useCategoryStore } from '../stores/categoryStore';
-import { useSubCategoryStore } from '../stores/subCategoryStore';
 import { gql, useQuery } from '@apollo/client';
-import { GET_NOTIFICATIONS } from '../graphql/queries';
 import OTPScreen from '../screens/OTPScreen';
 import ArtistProfileScreen from '../screens/ArtistProfileScreen';
 import CreateEditEventScreen from '../screens/CreateEditEventScreen';
@@ -26,6 +24,7 @@ import { InvitesScreen } from '../screens/profile/InvitesScreen';
 import { BookingsScreen } from '../screens/profile/BookingsScreen';
 import { MyEventsSection } from '../screens/profile/MyEventsSection';
 import { PortfolioScreen } from '../screens/profile/PortfolioScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -36,7 +35,7 @@ export type RootStackParamList = {
   Artists: undefined;
   Events: undefined;
   ArtistProfile: { artistId: number };
-  EditProfile: { user: User };
+  EditProfileScreen: { user: User };
   EditPortfolio: undefined;
   EventDetails: { eventId: string };
   ChatConversation: { chatId: number; userName: string, profile_picture: string };
@@ -97,7 +96,7 @@ const MainTabs = () => (
 const MainApp = () => {
   const { currentUser: user } = useAuthStore();
   const setCategories = useCategoryStore((state) => state.setCategories);
-  const setSubCategories = useSubCategoryStore((state) => state.setSubCategories);
+  const setSubCategories = useCategoryStore((state) => state.setSubCategories);
     useFetchNotifications();
 
   // Fetch categories and subcategories (global, no user dependency)
@@ -127,6 +126,7 @@ const MainApp = () => {
         <Stack.Screen name="BookingsScreen" component={BookingsScreen} />
         <Stack.Screen name="InvitesScreen" component={InvitesScreen} />
         <Stack.Screen name="MyEventsScreen" component={MyEventsSection} />
+        <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
       </Stack.Navigator>
     </ErrorBoundary>
 

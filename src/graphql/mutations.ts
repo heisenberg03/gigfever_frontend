@@ -13,6 +13,18 @@ export const SIGN_UP = gql`
   }
 `;
 
+export const UPDATE_USER = gql`
+  mutation UpdateUser($id: ID!, $input: UserInput!) {
+    updateUser(id: $id, input: $input) {
+      id
+      bio
+      budget
+      category
+      subcategories
+    }
+  }
+`;
+
 export const SIGN_IN_WITH_PHONE = gql`
   mutation SignInWithPhone($phoneNumber: String!, $otp: String!) {
     signInWithPhone(phoneNumber: $phoneNumber, otp: $otp) {

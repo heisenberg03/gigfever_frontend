@@ -13,7 +13,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       <Card.Content>
         <Title>{event.title}</Title>
         <Paragraph>Category: {event.category}</Paragraph>
-        <Paragraph>Date: {new Date(event.date).toLocaleDateString()}</Paragraph>
+        <Paragraph>Date: {new Date(event.dateTime).toLocaleDateString()}</Paragraph>
         <Paragraph>Location: {event.location}</Paragraph>
       </Card.Content>
     </Card>

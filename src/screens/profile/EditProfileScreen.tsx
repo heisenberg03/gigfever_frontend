@@ -1,154 +1,135 @@
-// src/screens/profile/EditProfileModal.tsx
-import React, { useState, useEffect } from 'react';
-import { Modal, View, ScrollView, StyleSheet } from 'react-native';
-import { TextInput, Button, Text, Chip, useTheme } from 'react-native-paper';
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useMutation } from '@apollo/client';
+import { UPDATE_USER } from '../../graphql/mutations';
 import { useAuthStore } from '../../stores/authStore';
+import { useCategoryStore } from '../../stores/categoryStore';
+import { TextInput, Button, Text } from 'react-native-paper';
+import MultiSelect from 'react-native-multiple-select';
+import SingleSelectDropdown from '../../components/SingleSelectDropdown';
 
-interface Props {
-  visible: boolean;
-  onClose: () => void;
-}
+const EditProfileScreen = () => {
+  const { currentUser: user, updateProfile } = useAuthStore();
+  const { categories, subCategories } = useCategoryStore();
 
-const EditProfileModal = ({ visible, onClose }: Props) => {
-  const { currentUser, updateProfile } = useAuthStore();
-  const [name, setName] = useState(currentUser?.fullName || '');
-  const [location, setLocation] = useState(currentUser?.location || '');
-  const [category, setCategory] = useState(currentUser?.category || '');
-  const [subcategories, setSubcategories] = useState(currentUser?.subcategories || []);
-  const [newSubcategory, setNewSubcategory] = useState('');
-  const theme = useTheme();
+  const [bio, setBio] = useState(user?.bio || '');
+  const [budget, setBudget] = useState(user?.budget || 0);
+  const [selectedCategory, setSelectedCategory] = useState(user?.category || '');
+  const [selectedSubcategories, setSelectedSubcategories] = useState(user?.subcategories || []);
 
-  useEffect(() => {
-    if (visible) {
-      setName(currentUser?.fullName || '');
-      setLocation(currentUser?.location || '');
-      setCategory(currentUser?.category || '');
-      setSubcategories(currentUser?.subcategories || []);
+  const [updateUser] = useMutation(UPDATE_USER, {
+    update(cache, { data: { updateUser } }) {
+      // Update Apollo cache with the updated user data
+      cache.modify({
+        fields: {
+          currentUser(existingUser = {}) {
+            return { ...existingUser, ...updateUser };
+          },
+        },
+      });
+    },
+  });
+
+  const handleSave = async () => {
+    // Update Zustand state immediately for UI responsiveness
+    updateProfile({
+      bio,
+      budget,
+      category: selectedCategory,
+      subcategories: selectedSubcategories,
+    });
+
+    try {
+      // Send mutation to backend
+      await updateUser({
+        variables: {
+          id: user?.id,
+          input: {
+            bio,
+            budget,
+            category: selectedCategory,
+            subcategories: selectedSubcategories,
+          },
+        },
+      });
+      alert('Profile updated successfully');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to update profile');
     }
-  }, [visible, currentUser]);
-
-  const handleSave = () => {
-    updateProfile({ fullName:'fullName', location, category, subcategories });
-    onClose();
-  };
-
-  const addSubcategory = () => {
-    if (newSubcategory && !subcategories.includes(newSubcategory)) {
-      setSubcategories([...subcategories, newSubcategory]);
-      setNewSubcategory('');
-    }
-  };
-
-  const removeSubcategory = (sub: string) => {
-    setSubcategories(subcategories.filter((s) => s !== sub));
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <ScrollView>
-            <Text style={styles.title}>Edit Profile</Text>
+    <View style={styles.container}>
+      <Text style={styles.label}>Bio</Text>
+      <TextInput
+        value={bio}
+        onChangeText={setBio}
+        style={styles.input}
+        mode="outlined"
+        placeholder="Enter your bio"
+      />
 
-            <TextInput
-              label="Name"
-              value={name}
-              onChangeText={setName}
-              mode="outlined"
-              style={styles.input}
-            />
+      <Text style={styles.label}>Budget (Rs/hr)</Text>
+      <TextInput
+        value={String(budget)}
+        onChangeText={(text) => setBudget(Number(text))}
+        style={styles.input}
+        mode="outlined"
+        keyboardType="numeric"
+        placeholder="Enter your budget"
+      />
 
-            <TextInput
-              label="Location"
-              value={location}
-              onChangeText={setLocation}
-              mode="outlined"
-              style={styles.input}
-            />
+      <Text style={styles.label}>Category</Text>
+      <SingleSelectDropdown
+        label="Select Category"
+        value={selectedCategory}
+        onValueChange={(value) => {
+          setSelectedCategory(value);
+          setSelectedSubcategories([]); // Reset subcategories when category changes
+        }}
+        items={categories.map((cat) => ({ label: cat, value: cat }))}
+        style={styles.dropdown}
+      />
 
-            <TextInput
-              label="Category"
-              value={category}
-              onChangeText={setCategory}
-              mode="outlined"
-              style={styles.input}
-            />
+      <Text style={styles.label}>Subcategories</Text>
+      <MultiSelect
+        items={subCategories[selectedCategory]?.map((sub) => ({
+          id: sub,
+          name: sub,
+        }))}
+        uniqueKey="id"
+        onSelectedItemsChange={setSelectedSubcategories}
+        selectedItems={selectedSubcategories}
+        selectText="Pick Subcategories"
+        searchInputPlaceholderText="Search Subcategories..."
+        tagRemoveIconColor="#6B48FF"
+        tagBorderColor="#6B48FF"
+        tagTextColor="#6B48FF"
+        selectedItemTextColor="#6B48FF"
+        selectedItemIconColor="#6B48FF"
+        itemTextColor="#000"
+        displayKey="name"
+        searchInputStyle={{ color: '#000' }}
+        submitButtonColor="#6B48FF"
+        submitButtonText="Done"
+        styleDropdownMenuSubsection={styles.multiSelectDropdown}
+      />
 
-            <TextInput
-              label="Add Subcategory"
-              value={newSubcategory}
-              onChangeText={setNewSubcategory}
-              mode="outlined"
-              style={styles.input}
-              onSubmitEditing={addSubcategory}
-              returnKeyType="done"
-            />
-
-            <View style={styles.chipContainer}>
-              {subcategories.map((sub, idx) => (
-                <Chip
-                  key={idx}
-                  onClose={() => removeSubcategory(sub)}
-                  style={styles.chip}
-                >
-                  {sub}
-                </Chip>
-              ))}
-            </View>
-          </ScrollView>
-
-          <View style={styles.buttonContainer}>
-            <Button onPress={onClose} style={styles.button}>
-              Cancel
-            </Button>
-            <Button mode="contained" onPress={handleSave} style={styles.button}>
-              Save
-            </Button>
-          </View>
-        </View>
-      </View>
-    </Modal>
+      <Button mode="contained" onPress={handleSave} style={styles.saveButton}>
+        Save
+      </Button>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 16,
-    maxHeight: '85%',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  input: {
-    marginBottom: 16,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
-  },
-  chip: {
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 16,
-  },
-  button: {
-    marginLeft: 8,
-  },
+  container: { flex: 1, padding: 20 },
+  label: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
+  input: { marginBottom: 16 },
+  dropdown: { marginBottom: 16 },
+  multiSelectDropdown: { marginBottom: 16 },
+  saveButton: { marginTop: 16 },
 });
 
-export default EditProfileModal;
+export default EditProfileScreen;

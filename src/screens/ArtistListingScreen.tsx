@@ -6,13 +6,12 @@ import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@apollo/client';
 import { GET_ARTISTS } from '../graphql/queries';
 import { useCategoryStore } from '../stores/categoryStore';
-import { useSubCategoryStore } from '../stores/subCategoryStore';
 
 const ArtistListingScreen = () => {
   const navigation = useNavigation();
-  const { categories } = useCategoryStore();
-  const { subCategories } = useSubCategoryStore();
+  const { categories, subCategories } = useCategoryStore();
   const { data, loading, error } = useQuery(GET_ARTISTS);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
@@ -22,6 +21,7 @@ const ArtistListingScreen = () => {
 
   const artists = data?.artists || [];
 
+  // Filter artists based on search query, category, and subcategory
   const filteredArtists = artists.filter((artist) => {
     const matchesSearch = artist.displayName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory ? artist.categories.includes(selectedCategory) : true;
@@ -29,36 +29,55 @@ const ArtistListingScreen = () => {
     return matchesSearch && matchesCategory && matchesSubCategory;
   });
 
+  // Get relevant subcategories for the selected category
+  const relevantSubCategories = selectedCategory ? subCategories[selectedCategory] || [] : [];
+
   return (
     <View style={styles.container}>
+      {/* Search Bar */}
       <Searchbar
         placeholder="Search artists"
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchbar}
       />
+
+      {/* Category Filter */}
       <ScrollView horizontal style={styles.filterScroll}>
         {categories.map((cat) => (
           <TouchableOpacity
-            key={cat.name}
-            onPress={() => setSelectedCategory(cat.name === selectedCategory ? null : cat.name)}
-            style={[styles.filterButton, selectedCategory === cat.name && styles.filterButtonActive]}
+            key={cat}
+            onPress={() => {
+              const isSameCategory = cat === selectedCategory;
+              setSelectedCategory(isSameCategory ? null : cat); // Toggle category selection
+              setSelectedSubCategory(null); // Reset subcategory when category changes
+            }}
+            style={[styles.filterButton, selectedCategory === cat && styles.filterButtonActive]}
           >
-            <Text style={styles.filterText}>{cat.name}</Text>
+            <Text style={styles.filterText}>{cat}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <ScrollView horizontal style={styles.filterScroll}>
-        {subCategories.map((sub) => (
-          <TouchableOpacity
-            key={sub.name}
-            onPress={() => setSelectedSubCategory(sub.name === selectedSubCategory ? null : sub.name)}
-            style={[styles.filterButton, selectedSubCategory === sub.name && styles.filterButtonActive]}
-          >
-            <Text style={styles.filterText}>{sub.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+
+      {/* Subcategory Filter (only visible if a category is selected) */}
+      {selectedCategory && (
+        <ScrollView horizontal style={styles.filterScroll}>
+          {relevantSubCategories.map((sub) => (
+            <TouchableOpacity
+              key={sub}
+              onPress={() => {
+                const isSameSubCategory = sub === selectedSubCategory;
+                setSelectedSubCategory(isSameSubCategory ? null : sub); // Toggle subcategory selection
+              }}
+              style={[styles.filterButton, selectedSubCategory === sub && styles.filterButtonActive]}
+            >
+              <Text style={styles.filterText}>{sub}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+
+      {/* Artist List */}
       <ScrollView contentContainerStyle={styles.content}>
         {filteredArtists.length > 0 ? (
           filteredArtists.map((artist) => (
