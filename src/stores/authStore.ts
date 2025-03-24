@@ -19,8 +19,9 @@ export interface UserProfile {
   profilePicture?: string;
   bio?: string;
   isArtist: boolean;
-  category: string | null;
-  subcategories: string[];
+  artistType: string;
+  categoryIDs: string[];
+  subCategoryIDs: string[];
   artistRating?: number;
   artistReviewCount?: number;
   hostRating?: number;

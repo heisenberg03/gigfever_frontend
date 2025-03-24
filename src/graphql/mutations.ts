@@ -19,11 +19,13 @@ export const UPDATE_USER = gql`
       id
       bio
       budget
-      category
-      subcategories
+      categoryIDs
+      subCategoryIDs
+      isArtist
     }
   }
 `;
+
 
 export const SIGN_IN_WITH_PHONE = gql`
   mutation SignInWithPhone($phoneNumber: String!, $otp: String!) {

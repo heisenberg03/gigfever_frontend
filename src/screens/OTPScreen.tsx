@@ -14,18 +14,28 @@ const OTPScreen = ({ route, navigation }: any) => {
       // For now, we'll simulate a successful verification
       const mockToken = 'mock-jwt-token';
       const mockUser = {
-        id: '1',
-        phone: phoneNumber,
-        username: 'testuser',
+        id: 'u1',
+        phone: '9783776837',
+        profilePicture: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
+        email:'dumjubmummy.jefhuowiucehbmy@email.som',
         fullName: 'Test User',
-        isArtist: true,
-        category: 'Music',
-        subcategories: [],
-        portfolio: []
+        username: 'Test',
+        isArtist: false,
+        bio: 'Event organizer with a passion for music.',
+        budget: 5000,
+        location: 'Mumbai',
+        artistType: 'band',
+        categoryIDs: ['1'],
+        artistRating: 4.5,
+        artistReviewCount: 10,
+        hostRating: 4.3,
+        hostReviewCount: 5,
+        subCategoryIDs: ['1','4'],
       };
 
-      authenticate(mockUser, mockToken);
-    } catch (error) {
+    authenticate(mockUser, mockToken);
+
+  } catch (error) {
       console.error('OTP verification failed:', error);
     }
   };

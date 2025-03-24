@@ -12,9 +12,8 @@ import AuthScreen from '../screens/AuthScreen';
 import EventDetailsScreen from '../screens/EventDetailsScreen';
 import ChatScreen from '../screens/ChatScreen';
 import { useAuthStore } from '../stores/authStore';
-import { useFetchNotifications, useNotificationStore } from '../stores/notificationStore';
-import { useCategoryStore } from '../stores/categoryStore';
-import { gql, useQuery } from '@apollo/client';
+import { useFetchNotifications } from '../stores/notificationStore';
+import { useFetchCategories } from '../stores/categoryStore';
 import OTPScreen from '../screens/OTPScreen';
 import ArtistProfileScreen from '../screens/ArtistProfileScreen';
 import CreateEditEventScreen from '../screens/CreateEditEventScreen';
@@ -25,6 +24,7 @@ import { BookingsScreen } from '../screens/profile/BookingsScreen';
 import { MyEventsSection } from '../screens/profile/MyEventsSection';
 import { PortfolioScreen } from '../screens/profile/PortfolioScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 export type RootStackParamList = {
   AuthStack: undefined;
@@ -94,23 +94,8 @@ const MainTabs = () => (
 
 // Wrapper component to initialize stores after authentication
 const MainApp = () => {
-  const { currentUser: user } = useAuthStore();
-  const setCategories = useCategoryStore((state) => state.setCategories);
-  const setSubCategories = useCategoryStore((state) => state.setSubCategories);
     useFetchNotifications();
-
-  // Fetch categories and subcategories (global, no user dependency)
-  const { data: categoriesData } = useQuery(gql`query { categories { id name } }`, { skip: !user });
-  const { data: subCategoriesData } = useQuery(gql`query { subCategories { id name } }`, { skip: !user });
-
-  useEffect(() => {
-    if (categoriesData?.categories) {
-      setCategories(categoriesData.categories);
-    }
-    if (subCategoriesData?.subCategories) {
-      setSubCategories(subCategoriesData.subCategories);
-    }
-  }, [categoriesData, subCategoriesData, setCategories, setSubCategories]);
+    useFetchCategories()
 
   return (
     <ErrorBoundary>
@@ -127,6 +112,7 @@ const MainApp = () => {
         <Stack.Screen name="InvitesScreen" component={InvitesScreen} />
         <Stack.Screen name="MyEventsScreen" component={MyEventsSection} />
         <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </ErrorBoundary>
 

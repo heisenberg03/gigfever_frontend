@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Text, TouchableOpacity } from 'react-native';
-import { Avatar, Button, Chip } from 'react-native-paper';
+import { Avatar, Button, Chip, Modal } from 'react-native-paper';
 import { useQuery, useMutation } from '@apollo/client';
 import { useAuthStore } from '../stores/authStore';
 import { useNotificationStore } from '../stores/notificationStore';
 import { GET_ARTISTS, GET_ARTIST_PORTFOLIO, GET_ARTIST_REVIEWS, INVITE_ARTIST, START_CHAT, REPORT_ARTIST } from '../graphql/queries';
-import ReviewModal from '../components/ReviewModal';
+import ReviewModal from '../components/ReviewsModal';
 
 const ArtistProfileScreen = ({ route, navigation }) => {
   const { artistId } = route.params;

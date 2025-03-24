@@ -1,11 +1,12 @@
 // App.tsx
 import React from 'react';
-import { PaperProvider } from 'react-native-paper';
+import { PaperProvider, Portal } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink, from } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
+import { theme } from './src/theme';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) console.log('GraphQL Errors:', graphQLErrors);
@@ -24,14 +25,6 @@ const client = new ApolloClient({
   },
 });
 
-const theme = {
-  colors: {
-    primary: '#6B48FF',
-    secondary: '#26A69A',
-    background: '#F5F5F5',
-  },
-};
-
 const AppContent: React.FC = () => {
   return <AppNavigator />;
 };
@@ -41,9 +34,11 @@ export default function App() {
     <ApolloProvider client={client}>
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
-          <NavigationContainer>
-            <AppContent />
-          </NavigationContainer>
+          <Portal.Host>
+            <NavigationContainer>
+              <AppContent />
+            </NavigationContainer>
+          </Portal.Host>
         </PaperProvider>
       </SafeAreaProvider>
     </ApolloProvider>
