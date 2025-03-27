@@ -16,22 +16,22 @@ const GET_CATEGORIES = gql`
   }
 `;
 
-interface SubCategory {
+export interface SubCategory {
   id: string;
   name: string;
 }
 
-interface Category {
+export interface Category {
   id: string;
   name: string;
   subCategories: SubCategory[];
 }
 
 interface CategoryState {
-  categories: Category[]; // List of categories with subcategories
-  setCategories: (categories: Category[]) => void; // Function to update categories
+  categories: Category[];
+  setCategories: (categories: Category[]) => void;
   subCategories: SubCategory[];
-  setSubCategories: (subCategories: SubCategory[]) => void;
+  setSubCategories: (categories: Category[]) => void;
 }
 
 export const useCategoryStore = create<CategoryState>((set) => ({
@@ -40,7 +40,13 @@ export const useCategoryStore = create<CategoryState>((set) => ({
 
   // Function to update the list of categories
   setCategories: (categories) => set({ categories }),
-  setSubCategories: (subCategories) => set({ subCategories }),
+  setSubCategories: (categories) => {
+    const subCategoriesMap = categories.reduce<SubCategory[]>((acc, category) => {
+      [...acc] = category.subCategories;
+      return acc;
+    }, []);
+    set({ subCategories: subCategoriesMap });
+  },
 }));
 
 export const useFetchCategories = () => {
@@ -52,9 +58,9 @@ export const useFetchCategories = () => {
     if (data?.categories) {
       // Update the Zustand store with the fetched categories
       setCategories(data.categories);
-      setSubCategories(data.categories.flatMap((category:Category) => category.subCategories));
+      setSubCategories(data.categories);
     }
-  }, [data, setCategories]);
+  }, [data, setCategories, setSubCategories]);
 
   if (error) {
     console.error('Error loading categories:', error);

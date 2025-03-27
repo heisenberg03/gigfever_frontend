@@ -32,9 +32,11 @@ export type RootStackParamList = {
   OTPScreen: { phoneNumber: string };
   Main: undefined;
   App: undefined;
-  Artists: undefined;
-  Events: undefined;
-  ArtistProfile: { artistId: number };
+  Home: undefined;
+  ArtistProfile: { artistId: string };
+  ArtistListing: undefined;
+  Bookings: undefined;
+  Profile: undefined;  Events: undefined;
   EditProfileScreen: { user: User };
   EditPortfolio: undefined;
   EventDetails: { eventId: string };
@@ -73,7 +75,7 @@ const MainTabs = () => (
         options={{ tabBarIcon: ({ color }) => <Ionicons name="calendar" size={20} color={color} /> }}
       />
       <Tab.Screen
-        name="Artists"
+        name="ArtistListing"
         component={ArtistListingScreen}
         options={{ tabBarIcon: ({ color }) => <Ionicons name="mic" size={20} color={color} /> }}
       />
@@ -106,7 +108,7 @@ const MainApp = () => {
         <Stack.Screen name="CreateEditEvent" component={CreateEditEventScreen} />
         <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="ArtistProfile" component={ArtistProfileScreen} />
-        <Stack.Screen name="Artists" component={ArtistListingScreen} />
+        <Stack.Screen name="ArtistListing" component={ArtistListingScreen} />
         <Stack.Screen name="PortfolioScreen" component={PortfolioScreen} />
         <Stack.Screen name="BookingsScreen" component={BookingsScreen} />
         <Stack.Screen name="InvitesScreen" component={InvitesScreen} />

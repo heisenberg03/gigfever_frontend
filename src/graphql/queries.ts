@@ -2,16 +2,19 @@ import { gql } from '@apollo/client';
 
 export const GET_ARTISTS = gql`
   query GetArtists {
-    artists {
+    users {
       id
-      displayName
+      fullName
+      username
       profilePicture
-      categories
-      subCategories
-      rating
-      reviewCount
-      pastBookings
+      isArtist
       bio
+      budget
+      location
+      categoryIDs
+      subCategoryIDs
+      artistRating
+      artistReviewCount
     }
   }
 `;
