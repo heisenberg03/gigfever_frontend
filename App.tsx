@@ -7,6 +7,10 @@ import { onError } from '@apollo/client/link/error';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import { theme } from './src/theme';
+import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
+
+loadDevMessages();
+loadErrorMessages();
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) console.log('GraphQL Errors:', graphQLErrors);

@@ -1,31 +1,55 @@
 import { gql } from '@apollo/client';
 
 export const GET_ARTISTS = gql`
-  query GetArtists {
-    users {
+  query GetArtists(
+    $search: String
+    $categoryId: ID
+    $subCategoryIds: [ID!]
+    $location: String
+    $minBudget: Int
+    $maxBudget: Int
+    $minRating: Float
+    $sortBy: String
+  ) {
+    artists(
+      search: $search
+      categoryId: $categoryId
+      subCategoryIds: $subCategoryIds
+      location: $location
+      minBudget: $minBudget
+      maxBudget: $maxBudget
+      minRating: $minRating
+      sortBy: $sortBy
+    ) {
       id
-      fullName
+      phoneNumber
       username
+      fullName
+      email
       profilePicture
       isArtist
       bio
       budget
       location
+      artistType
       categoryIDs
       subCategoryIDs
       artistRating
       artistReviewCount
+      hostRating
+      hostReviewCount
+      pastBookings
     }
   }
 `;
 
 export const GET_ARTIST_PORTFOLIO = gql`
   query GetArtistPortfolio($id: ID!) {
-    artist(id: $id) {
-      portfolio {
-        type
-        url
-      }
+    portfolio(userId: $id) {
+      id
+      mediaType
+      mediaUrl
+      thumbnail
     }
   }
 `;

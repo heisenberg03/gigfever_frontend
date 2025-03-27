@@ -19,6 +19,7 @@ const mockData = {
       artistReviewCount: 10,
       hostRating: 4.3,
       hostReviewCount: 5,
+      pastBookings: 10,
       subCategoryIDs: ['1','4'],
     },
     {
@@ -59,7 +60,7 @@ const mockData = {
       hostRating: 4.2,
       hostReviewCount: 3,
       subCategoryIDs: ['2'],
-      pastBookings: 23,
+      pastBookings: 10,
     },
     {
       id: 'a3',
@@ -79,7 +80,7 @@ const mockData = {
       hostRating: 4.7,
       hostReviewCount: 4,
       subCategoryIDs: ['8'],
-      pastBookings: 19,
+      pastBookings: 10,
     },
     {
       id: 'a4',
@@ -99,7 +100,7 @@ const mockData = {
       hostRating: 4.4,
       hostReviewCount: 2,
       subCategoryIDs: ['6'],
-      pastBookings: 28,
+      pastBookings: 10,
     },
     {
       id: 'a5',
@@ -119,7 +120,7 @@ const mockData = {
       hostRating: 4.1,
       hostReviewCount: 3,
       subCategoryIDs: ['4'],
-      pastBookings: 42,
+      pastBookings: 10,
     },
     {
       id: 'a6',
@@ -139,7 +140,7 @@ const mockData = {
       hostRating: 4.3,
       hostReviewCount: 1,
       subCategoryIDs: ['5', '7'],
-      pastBookings: 16,
+      pastBookings: 10,
     },
     {
       id: 'a7',
@@ -159,7 +160,7 @@ const mockData = {
       hostRating: 4.5,
       hostReviewCount: 6,
       subCategoryIDs: ['10'],
-      pastBookings: 53,
+      pastBookings: 10,
     },
     {
       id: 'a8',
@@ -179,7 +180,7 @@ const mockData = {
       hostRating: 4.2,
       hostReviewCount: 3,
       subCategoryIDs: ['3'],
-      pastBookings: 31,
+      pastBookings: 10,
     },
   ],
   events: [
@@ -193,8 +194,69 @@ const mockData = {
     { id: 'i1', userId: 'u1', event: { id: 'e1', title: 'Rock Night', host: { id: 'h1', displayName: 'Host' } }, status: 'pending' },
   ],
   portfolio: [
-    { id: 'p1', userId: 'u1', mediaType: 'IMAGE', mediaUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e', thumbnail: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&h=100&fit=crop' },
-    { id: 'p2', userId: 'u1', mediaType: 'VIDEO', mediaUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg' },
+    {
+      id: 'p1',
+      userId: 'a1',
+      mediaType: 'IMAGE',
+      mediaUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b',
+      thumbnail: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=100&h=100&fit=crop'
+    },
+    {
+      id: 'p2',
+      userId: 'a1',
+      mediaType: 'VIDEO',
+      mediaUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg'
+    },
+    {
+      id: 'p3',
+      userId: 'a1',
+      mediaType: 'IMAGE',
+      mediaUrl: 'https://images.unsplash.com/photo-1535090042247-30387519d11f',
+      thumbnail: 'https://images.unsplash.com/photo-1535090042247-30387519d11f?w=100&h=100&fit=crop'
+    },
+    {
+      id: 'p4',
+      userId: 'a1',
+      mediaType: 'VIDEO',
+      mediaUrl: 'https://www.instagram.com/reel/DFGEgnYIM6E/?utm_source=ig_embed&amp;utm_campaign=loading',
+      thumbnail: 'https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg'
+    },
+    {
+      id: 'p5',
+      userId: 'a1',
+      mediaType: 'IMAGE',
+      mediaUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8',
+      thumbnail: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=100&h=100&fit=crop'
+    },
+    {
+      id: 'p6',
+      userId: 'a1',
+      mediaType: 'VIDEO',
+      mediaUrl: 'https://www.youtube.com/embed/OPf0YbXqDm0',
+      thumbnail: 'https://img.youtube.com/vi/OPf0YbXqDm0/mqdefault.jpg'
+    },
+    {
+      id: 'p7',
+      userId: 'a1',
+      mediaType: 'IMAGE',
+      mediaUrl: 'https://images.unsplash.com/photo-1548192746-dd526f154ed9',
+      thumbnail: 'https://images.unsplash.com/photo-1548192746-dd526f154ed9?w=100&h=100&fit=crop'
+    },
+    {
+      id: 'p8',
+      userId: 'a1',
+      mediaType: 'VIDEO',
+      mediaUrl: 'https://www.youtube.com/embed/9bZkp7q19f0',
+      thumbnail: 'https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg'
+    },
+    {
+      id: 'p9',
+      userId: 'a1',
+      mediaType: 'IMAGE',
+      mediaUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b',
+      thumbnail: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=100&h=100&fit=crop'
+    }
   ],
   notifications: [
     { id: 'n1', message: 'New event created', timestamp: '2025-03-01T10:00:00Z', type: 'GENERAL', relatedId: 'e1', read: false },
@@ -294,6 +356,7 @@ const typeDefs = gql`
   type Query {
     user(id: ID!): User
     categories: [Category!]!
+    portfolio(userId: ID!): [PortfolioItem!]!
   }
 
   type Mutation {
@@ -399,7 +462,6 @@ const typeDefs = gql`
     bookings(userId: ID!): [Booking!]!
     events(userId: ID!): [Event!]!
     invites(userId: ID!): [Invite!]!
-    portfolio(userId: ID!): [PortfolioItem!]!
     subCategories: [SubCategory!]!
     notifications(userId: ID!): [Notification!]!
     categories: [Category!]!
@@ -441,7 +503,7 @@ const resolvers = {
     bookings: (_, { userId }) => mockData.bookings.filter((b) => b.userId === userId),
     events: (_, { userId }) => mockData.events.filter((e) => e.host.id === userId),
     invites: (_, { userId }) => mockData.invites.filter((i) => i.userId === userId),
-    portfolio: (_, { userId }) => mockData.portfolio.filter((p) => p.userId === userId),
+    portfolio: (_, { userId }) => mockData.portfolio.filter(item => item.userId === userId),
     categories: () => mockData.categories,
     subCategories: () => mockData.categories.flatMap((c) => c.subCategories),
     notifications: (_, { userId }) => mockData.notifications.filter((n) => n.userId === userId),

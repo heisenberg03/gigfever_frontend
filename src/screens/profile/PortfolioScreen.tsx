@@ -115,7 +115,7 @@ export const PortfolioScreen = () => {
       addMedia(newMedia); // Optimistic update
       await addPortfolioItem({
         variables: {
-          userId: user.id,
+          userId: user?.id,
           input: {
             mediaType: media.mediaType,
             mediaUrl: media.mediaUrl,
