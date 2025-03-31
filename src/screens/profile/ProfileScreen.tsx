@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image, Platform, StatusBar } from 'react-native';
 import { Text, Chip, useTheme } from 'react-native-paper';
 import { useAuthStore } from '../../stores/authStore';
 import ReviewsModal from '../../components/ReviewsModal';
@@ -8,6 +8,27 @@ import { useCategoryStore } from '../../stores/categoryStore';
 import * as ImagePicker from 'expo-image-picker';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 import RatingBox from '../../components/RatingBox';
+
+interface User {
+  id: string;
+  phoneNumber: string;
+  username: string;
+  fullName: string;
+  email?: string;
+  profilePicture?: string;
+  isArtist: boolean;
+  bio?: string;
+  budget?: number;
+  categoryIDs?: string[];
+  subCategoryIDs?: string[];
+  pastBookings?: number;
+  artistRating?: number;
+  artistReviewCount?: number;
+  hostRating?: number;
+  hostReviewCount?: number;
+  location?: string;
+  artistType?: string;
+}
 
 const ProfileScreen = ({ navigation }: any) => {
   const { currentUser, toggleArtistMode } = useAuthStore();
@@ -20,7 +41,7 @@ const ProfileScreen = ({ navigation }: any) => {
   const [pendingArtistMode, setPendingArtistMode] = useState(false);
   const [activeReviewType, setActiveReviewType] = useState<string | undefined>(undefined);
   console.log(currentUser, categories)
-  const profileCategory = categories.find((cat) => cat.id === currentUser?.categoryIDs[0]) || { name: 'Not selected', subCategories: [] };
+  const profileCategory = categories.find((cat) => cat.id === currentUser?.categoryIDs?.[0]) || { name: 'Not selected', subCategories: [] };
   if (!currentUser) return null;
 
   const handleNavigate = (screen: string) => {
@@ -44,10 +65,10 @@ const ProfileScreen = ({ navigation }: any) => {
   };
 
   const cardData = [
-    { title: 'My Portfolio', subtitle: 'Manage your portfolio', screen: 'PortfolioScreen', icon: 'images' },
-    { title: 'My Bookings', subtitle: 'View your bookings', screen: 'BookingsScreen', icon: 'calendar-check' },
+    { title: 'Portfolio', subtitle: 'Manage your portfolio', screen: 'PortfolioScreen', icon: 'images' },
+    { title: 'Bookings', subtitle: 'View your bookings', screen: 'BookingsScreen', icon: 'calendar-check' },
     { title: 'Invites', subtitle: 'Check your invites', screen: 'InvitesScreen', icon: 'envelope-open-text' },
-    { title: 'My Events', subtitle: 'Manage your events', screen: 'MyEventsScreen', icon: 'calendar-alt' },
+    { title: 'Events', subtitle: 'Manage your created events', screen: 'MyEventsScreen', icon: 'calendar-alt' },
     { title: 'Settings', subtitle: 'Account settings', screen: 'Settings', icon: 'cog' },
   ];
 
@@ -92,10 +113,12 @@ const ProfileScreen = ({ navigation }: any) => {
     setActiveReviewType(type);
     setShowReviewsVisible(show);
   };
+  
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
-      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
+      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
         {/* Header Actions - Show preview only in artist mode */}
         <View style={styles.headerActions}>
           <TouchableOpacity
@@ -113,12 +136,12 @@ const ProfileScreen = ({ navigation }: any) => {
               <TouchableOpacity onPress={handleImagePick}>
                 {currentUser?.profilePicture ? (
                   <Image
-                    source={{ uri: currentUser.profilePicture }}
                     style={styles.profileImage}
+                    source={{ uri: currentUser.profilePicture }}
                   />
                 ) : (
-                  <View style={styles.imagePlaceholder}>
-                    <MaterialIcons name="add-a-photo" size={40} color={theme.colors.primary} />
+                  <View style={styles.profileImagePlaceholder}>
+                    <MaterialIcons name="account-circle" size={40} color="#666" />
                   </View>
                 )}
               </TouchableOpacity>
@@ -409,7 +432,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     height: 80,
     borderRadius: 40,
   },
-  imagePlaceholder: {
+  profileImagePlaceholder: {
     width: 80,
     height: 80,
     borderRadius: 40,
@@ -517,7 +540,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignSelf: 'center',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    marginTop: 16,
+    marginBottom: 32,
     borderRadius: 20,
     backgroundColor: '#f0f0f0',
     gap: 8,

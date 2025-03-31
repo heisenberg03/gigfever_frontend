@@ -29,7 +29,7 @@ export const theme = {
   colors: {
     ...MD3LightTheme.colors,
     primary: '#6B48FF',
-    secondary: '#26A69A',
+    secondary: '#FF488A',
     background: '#F5F5F5',
   },
   fonts: configureFonts({ config: fontConfig }),

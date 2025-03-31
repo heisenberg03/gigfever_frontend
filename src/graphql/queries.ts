@@ -1,5 +1,66 @@
+// src/graphql/queries.ts
 import { gql } from '@apollo/client';
 
+export const GET_CHAT_MESSAGES = gql`
+  query GetChatMessages($receiverId: ID!) {
+    chatMessages(receiverId: $receiverId) {
+      id
+      content
+      timestamp
+      senderId
+      receiverId
+      read
+    }
+  }
+`;
+
+export const GET_USER_PROFILE = gql`
+  query GetUserProfile($userId: ID!) {
+    user(id: $userId) {
+      id
+      fullName
+      profilePicture
+      isOnline
+    }
+  }
+`;
+
+export const GET_CHAT_LIST = gql`
+  query GetChatList {
+    chatList {
+      id
+      userId
+      fullName
+      profilePicture
+      lastMessage {
+        content
+        timestamp
+        senderId
+      }
+      unreadCount
+      isOnline
+    }
+  }
+`;
+
+export const GET_NOTIFICATIONS = gql`
+  query GetNotifications($userId: ID!) {
+    notifications(userId: $userId) {
+      id
+      message
+      timestamp
+      type
+      relatedId
+      read
+    }
+  }
+`;
+
+export const MARK_AS_READ = gql`
+  mutation MarkMessageAsRead($messageId: ID!) {
+    markMessageAsRead(messageId: $messageId)
+  }
+`;
 export const GET_ARTISTS = gql`
   query GetArtists(
     $search: String
@@ -43,6 +104,61 @@ export const GET_ARTISTS = gql`
   }
 `;
 
+export const GET_FAVORITE_ARTISTS = gql`
+  query GetFavoriteArtists {
+    artists {
+      id
+      phoneNumber
+      username
+      fullName
+      email
+      profilePicture
+      isArtist
+      bio
+      budget
+      location
+      artistType
+      categoryIDs
+      subCategoryIDs
+      artistRating
+      artistReviewCount
+      hostRating
+      hostReviewCount
+      pastBookings
+    }
+  }
+`;
+
+export const GET_FAVORITE_EVENTS = gql`
+  query GetFavoriteEvents {
+    events {
+      id
+      title
+      description
+      banner
+      dateTime
+      location {
+        lat
+        lng
+        address
+      }
+      status
+      eventType
+      budget {
+        min
+        max
+      }
+      category
+      subcategories
+      host { 
+        id 
+        displayName 
+        profilePicture
+      }
+    }
+  }
+`;
+
 export const GET_ARTIST_PORTFOLIO = gql`
   query GetArtistPortfolio($id: ID!) {
     portfolio(userId: $id) {
@@ -81,15 +197,7 @@ export const GET_TRENDING_ARTISTS = gql`
     }
   }
 `;
-export const GET_CHAT_MESSAGES = gql`
-  query GetChatMessages($receiverId: ID!) {
-    chatMessages(receiverId: $receiverId) {
-      id
-      content
-      timestamp
-    }
-  }
-`;
+
 
 export const GET_EVENT_ARTISTS = gql`
   query GetEventArtists($id: ID!) {
@@ -99,7 +207,7 @@ export const GET_EVENT_ARTISTS = gql`
         displayName
         profilePicture
         categories
-        subCategories
+        subcategories
         portfolio { type url }
         rating
         reviewCount
@@ -136,19 +244,6 @@ export const GET_SUB_CATEGORIES = gql`
     subCategories {
       id
       name
-    }
-  }
-`;
-
-export const GET_NOTIFICATIONS = gql`
-  query GetNotifications($userId: ID!) {
-    notifications(userId: $userId) {
-      id
-      message
-      timestamp
-      type
-      relatedId
-      read
     }
   }
 `;
@@ -275,6 +370,62 @@ export const CANCEL_EVENT = gql`
     cancelEvent(eventId: $eventId) {
       id
       status
+    }
+  }
+`;
+
+export const GET_EVENTS_WITH_FILTERS = gql`
+  query GetEventsWithFilters(
+    $search: String
+    $categoryId: ID
+    $subCategoryIds: [ID!]
+    $location: String
+    $minBudget: Int
+    $maxBudget: Int
+    $startDate: String
+    $endDate: String
+    $sortBy: String
+  ) {
+    events(
+      search: $search
+      categoryId: $categoryId
+      subCategoryIds: $subCategoryIds
+      location: $location
+      minBudget: $minBudget
+      maxBudget: $maxBudget
+      startDate: $startDate
+      endDate: $endDate
+      sortBy: $sortBy
+    ) {
+      id
+      title
+      description
+      banner
+      dateTime
+      location {
+        lat
+        lng
+        address
+      }
+      status
+      eventType
+      budget {
+        min
+        max
+      }
+      category
+      subcategories
+      host { 
+        id 
+        displayName 
+        profilePicture
+        rating
+        reviewsCount
+        pastEventsCount
+      }
+      applicationsCount
+      isFavorite
+      userApplicationStatus
     }
   }
 `;

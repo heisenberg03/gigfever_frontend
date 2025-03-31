@@ -1,11 +1,11 @@
-// src/screens/HomeScreen.tsx
-import React from 'react';
-import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, ScrollView, Text, TouchableOpacity, StyleSheet, Platform, StatusBar } from 'react-native';
 import { Appbar, Card, FAB } from 'react-native-paper';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useAuthStore } from '../stores/authStore';
 import { useNotificationStore } from '../stores/notificationStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { theme } from '../theme';
 
 const HEADER_HEIGHT = 56;
 
@@ -18,6 +18,13 @@ const HomeScreen = ({navigation}: any) => {
   const headerStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: withTiming(scrollY.value > 50 ? -HEADER_HEIGHT : 0) }],
   }));
+
+  useEffect(() => {
+    StatusBar.setBarStyle('light-content', true);
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor(theme.colors.primary);
+    }
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text, useTheme, HelperText, Chip } from 'react-native-paper';
+import { ScrollView, StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { TextInput, Button, Text, useTheme, HelperText, Chip, Appbar } from 'react-native-paper';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useAuthStore } from '../../stores/authStore';
 import { useCategoryStore } from '../../stores/categoryStore';
 import { gql, useMutation } from '@apollo/client';
 import { validateEmail } from '../../utils/validators';
+import { StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Add email verification mutation
 const VERIFY_EMAIL = gql`
@@ -193,9 +195,16 @@ const EditProfileScreen = ({ navigation }: any) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
-      <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+      <View style={styles.headerContainer}>
+        <Appbar.Header style={styles.header}>
+          <Appbar.BackAction onPress={() => navigation.goBack()} />
+          <Appbar.Content title="Edit Profile" titleStyle={styles.headerTitle} />
+        </Appbar.Header>
+      </View>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
         <ScrollView 
-          style={styles.container}
+          style={styles.scrollView}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -379,8 +388,26 @@ const EditProfileScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#fff',
+  },
+  headerContainer: {
+    backgroundColor: '#FFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eaeaea',
+  },
+  header: {
+    backgroundColor: '#FFF',
+    elevation: 0,
+    height: 56,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
+  scrollView: {
+    flex: 1,
+    padding: 16,
   },
   section: {
     borderBottomWidth: 1,

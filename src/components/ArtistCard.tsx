@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Image, Dimensions, Platform, StatusBar } from 'react-native';
 import { Card, Icon } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useCategoryStore } from '../stores/categoryStore';
@@ -7,38 +7,36 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { theme } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
-interface ArtistCardProps {
-  artist: {
-    id: string;
-    fullName: string;
-    artistType: string;
-    location: string;
-    artistRating: number;
-    artistReviewCount: number;
-    budget: number;
-    categoryIDs: string[];
-    subCategoryIDs: string[];
-    profilePicture?: string;
-    username: string;
-  };
-  width?: number;
+interface Artist {
+  id: string;
+  fullName: string;
+  artistType?: string;
+  location?: string;
+  artistRating?: number;
+  artistReviewCount?: number;
+  budget?: number;
+  categoryIDs?: string[];
+  subCategoryIDs?: string[];
+  profilePicture?: string;
+  username?: string;
 }
 
-const ArtistCard: React.FC<ArtistCardProps> = ({ artist, width }) => {
+const ArtistCard = ({ artist, width }: { artist: Artist; width?: number }) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { categories } = useCategoryStore();
 
   const artistCategory = categories.find(cat => 
-    cat.id === artist.categoryIDs[0]
+    cat.id === artist.categoryIDs?.[0]
   );
 
   const artistSubCategories = categories
     .flatMap(cat => cat.subCategories)
-    .filter(sub => artist.subCategoryIDs.includes(sub.id))
+    .filter(sub => artist.subCategoryIDs?.includes(sub.id))
     .slice(0, 3); // Allow up to 3 subcategories
 
-  const defaultImage = 'https://via.placeholder.com/200x200';
+  const defaultImage = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4';
   const cardWidth = width || (Dimensions.get('window').width / 2) - 16;
+
 
   return (
     <Card
@@ -62,9 +60,9 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, width }) => {
             {artist.fullName}
           </Text>
           <View style={styles.ratingPill}>
-            <Icon source="star" size={10} color="#FF9500" />
+            <Icon source="star" size={10} color="#000000" />
             <Text style={styles.ratingText}>
-              {artist.artistRating.toFixed(1)}
+              {artist.artistRating?.toFixed(1) || 'N/A'}
             </Text>
           </View>
         </View>
@@ -73,7 +71,7 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, width }) => {
           {/* Artist Type Chip */}
           <View style={[styles.chip, styles.artistTypeChip]}>
             <Text style={[styles.chipText, styles.artistTypeText]} numberOfLines={1}>
-              {artist.artistType}
+              {artist.artistType || 'N/A'}
             </Text>
           </View>
 
@@ -133,16 +131,19 @@ const styles = StyleSheet.create({
   ratingPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF5E6',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 12,
     gap: 3,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    elevation: 1,
   },
   ratingText: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#FF9500',
+    color: '#000000',
   },
   chipsContainer: {
     flexDirection: 'row',
@@ -160,16 +161,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   artistTypeChip: {
-    backgroundColor: '#E6F2FF',
+    backgroundColor: '#FFB448',
   },
   artistTypeText: {
-    color: '#0066CC',
+    color: '#FFFFFF',
   },
   categoryChip: {
-    backgroundColor: '#F0E6FF',
+    backgroundColor: '#4C68FF',
   },
   categoryText: {
-    color: '#6600CC',
+    color: '#FFFFFF',
   },
   subCategoryChip: {
     backgroundColor: theme.colors.primary + '15',
