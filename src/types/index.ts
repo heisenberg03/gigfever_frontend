@@ -17,7 +17,28 @@ export interface User {
     title: string;
     category: string;
     dateTime: string;
-    location: string;
+    location: Location;
     host: User;
     status: string;
+    isDraft: boolean;
+    applicationsCount: number;
+    createdAt: string;
+    updatedAt: string;
+    type?: string;
+    budget?: { min: number; max: number };
+    banner?: string;
+    selectedArtist?: {
+      fullName: string;
+      profilePicture?: string;
+    };
+    subcategories?: string[];
+    eventType?: string;
+    reviewsCount?: number;
+    pastEventsCount?: number;
+  }
+
+  export interface Location {
+    lat: number;
+    lng: number;
+    address: string;
   }

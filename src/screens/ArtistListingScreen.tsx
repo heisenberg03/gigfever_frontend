@@ -83,7 +83,7 @@ const ArtistListingScreen = () => {
   const [showFilterChips, setShowFilterChips] = useState(false);
 
   // Dynamic header height to match EventListingScreen
-  const HEADER_MAX_HEIGHT = selectedCategory ? 300 : 260;
+  const HEADER_MAX_HEIGHT = Platform.OS === 'android' ?  (selectedCategory ? 270 : 220) :  (selectedCategory ? 300 : 260);
   const HEADER_MIN_HEIGHT = 0;
   const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
@@ -229,7 +229,7 @@ const ArtistListingScreen = () => {
 
   useEffect(() => {
     StatusBar.setBarStyle('light-content');
-    StatusBar.setBackgroundColor(theme.colors.primary);
+    if(Platform.OS=='android')StatusBar.setBackgroundColor(theme.colors.primary);
   }, []);
 
   return (
@@ -305,7 +305,7 @@ const ArtistListingScreen = () => {
       </Animated.View>
 
       {/* Mini Header */}
-      <Animated.View style={[styles.miniHeader, { paddingTop: 40, height: insets.top + 40 }]}>
+      <Animated.View style={[styles.miniHeader, { paddingTop: Platform.OS === 'android' ? 10 : 40, height: insets.top + 40 }]}>
         <View style={styles.miniHeaderContent}>
           <View style={styles.miniHeaderActions}>
             <IconButton icon="magnify" iconColor="#FFF" size={24} onPress={() => scrollY.setValue(0)} />
@@ -356,7 +356,7 @@ const ArtistListingScreen = () => {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         numColumns={2}
-        contentContainerStyle={[styles.artistListContainer, { paddingTop: HEADER_MAX_HEIGHT + insets.top + (showFilterChips && hasActiveFilters ? 50 : 0) }]}
+        contentContainerStyle={[styles.artistListContainer, { paddingTop: HEADER_MAX_HEIGHT + (showFilterChips && hasActiveFilters ? 50 : 30) }]}
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -430,6 +430,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     elevation: 4,
     overflow: 'hidden',
+    marginBottom: 16,
   },
   headerContent: { flex: 1 },
   topRow: {
@@ -444,7 +445,7 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', alignItems: 'center' },
   actionButton: { margin: 0 },
   welcomeText: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginHorizontal: 16, marginBottom: 16 },
-  searchBar: { marginHorizontal: 16, marginBottom: 12, elevation: 0, backgroundColor: '#FFFFFF', borderRadius: 12 },
+  searchBar: { marginHorizontal: 16, marginBottom: 12, elevation: 0, backgroundColor: '#FFFFFF' },
   searchInput: { fontSize: 14 },
   categoryScroll: { paddingHorizontal: 16, marginBottom: 8, height: 40 },
   subCategoryScroll: { paddingHorizontal: 16, marginBottom: 8, height: 40 },

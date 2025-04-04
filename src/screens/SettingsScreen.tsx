@@ -11,6 +11,7 @@ interface NotificationSettings {
   messages: boolean;
   reminders: boolean;
   updates: boolean;
+  applications: boolean;
 }
 
 export const SettingsScreen = ({ navigation }: any) => {
@@ -23,6 +24,7 @@ export const SettingsScreen = ({ navigation }: any) => {
     messages: true,
     reminders: true,
     updates: false,
+    applications: true,
   });
   const [themeMode, setThemeMode] = useState('system');
   const [themeModalVisible, setThemeModalVisible] = useState(false);
@@ -82,7 +84,7 @@ export const SettingsScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView  edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: theme.colors.background }}>
     <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <List.Section>
+      {/* <List.Section>
         <List.Subheader>Appearance</List.Subheader>
         <List.Item
           title="Theme"
@@ -90,7 +92,7 @@ export const SettingsScreen = ({ navigation }: any) => {
           left={props => <List.Icon {...props} icon="brightness-6" />}
           onPress={() => setThemeModalVisible(true)}
         />
-      </List.Section>
+      </List.Section> */}
 
       <List.Section>
         <List.Subheader>Notifications</List.Subheader>

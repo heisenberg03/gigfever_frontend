@@ -100,8 +100,8 @@ const ArtistCard = ({ artist, width }: { artist: Artist; width?: number }) => {
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 8,
-    marginHorizontal: 4,
+    marginBottom: 18,
+    marginHorizontal: 6,
     borderRadius: 12,
     backgroundColor: 'white',
     overflow: 'hidden',

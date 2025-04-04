@@ -15,7 +15,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuthStore } from '../stores/authStore';
 import { GET_CHAT_LIST } from '../graphql/queries';
 import { theme } from '../theme';
-import { StatusBar } from 'react-native';
 
 const ChatListScreen = ({navigation}: {navigation: any}) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,7 +81,6 @@ const ChatListScreen = ({navigation}: {navigation: any}) => {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       <Appbar.Header style={styles.header}>
         <Appbar.Content title="Messages" titleStyle={styles.headerTitle} />
       </Appbar.Header>

@@ -1,16 +1,19 @@
 // src/stores/portfolioStore.ts
 import { create } from 'zustand';
 
+interface PortfolioItem {
+  id: string;
+  userId: string;
+  mediaType: 'IMAGE' | 'VIDEO';
+  mediaUrl: string;
+  thumbnail: string;
+  source?: 'youtube' | 'instagram' | 'facebook' | 'x';
+}
+
 interface PortfolioState {
-  portfolio: Array<{
-    id: string;
-    userId: string;
-    mediaType: string;
-    mediaUrl: string;
-    thumbnail: string;
-  }>;
-  setPortfolio: (portfolio: PortfolioState['portfolio']) => void;
-  addMedia: (media: PortfolioState['portfolio'][0]) => void;
+  portfolio: PortfolioItem[];
+  setPortfolio: (portfolio: PortfolioItem[]) => void;
+  addMedia: (media: PortfolioItem) => void;
   removeMedia: (mediaId: string) => void;
 }
 

@@ -540,10 +540,30 @@ const mockData = {
   events: eventData,
   reviews: reviewsData,
   bookings: [
-    { id: 'b1', userId: 'u1', event: { id: 'e1', title: 'Rock Night' }, status: 'confirmed', date: '2025-04-01' },
+    { 
+      id: 'b1', 
+      userId: 'u1', 
+      event: { 
+        id: 'e1', 
+        title: 'Rock Night',
+        status: 'Open'
+      }, 
+      status: 'confirmed', 
+      date: '2025-04-01' 
+    },
   ],
   invites: [
-    { id: 'i1', userId: 'u1', event: { id: 'e1', title: 'Rock Night', host: { id: 'h1', displayName: 'Host' } }, status: 'pending' },
+    { 
+      id: 'i1', 
+      userId: 'u1', 
+      event: { 
+        id: 'e1', 
+        title: 'Rock Night', 
+        host: { id: 'h1', displayName: 'Host' },
+        status: 'Open'
+      }, 
+      status: 'pending' 
+    },
   ],
   portfolio: [
     {
@@ -1043,7 +1063,17 @@ const resolvers = {
     user: (_, { id }) => mockData.users.find((u) => u.id === id),
     event: (_, { id }) => mockData.events.find(e => e.id === id),
     userReviews: (_, { userId, type }) => mockData.reviews.filter(r => r.userId === userId && (!type || r.type === type)),
-    bookings: (_, { userId }) => mockData.bookings.filter((b) => b.userId === userId),
+    bookings: (_, { userId }) => {
+      return mockData.bookings
+        .filter((b) => b.userId === userId)
+        .map(booking => ({
+          ...booking,
+          event: {
+            ...booking.event,
+            status: mockData.events.find(e => e.id === booking.event.id)?.status || 'Open'
+          }
+        }));
+    },
     events: (_, { 
       userId, 
       search, 

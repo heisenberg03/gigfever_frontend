@@ -20,7 +20,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 const client = new ApolloClient({
   link: from([
     errorLink,
-    new HttpLink({ uri: 'http://192.168.0.103:4000/graphql' }) // Replace with your IP
+    new HttpLink({ uri: 'http://192.168.0.102:4000/graphql' }) // Replace with your IP
   ]),
   cache: new InMemoryCache(),
   defaultOptions: {

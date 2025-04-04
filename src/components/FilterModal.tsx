@@ -6,12 +6,14 @@ import { theme } from '../theme';
 interface Category {
   id: string;
   name: string;
+  image: string;
   subCategories: SubCategory[];
 }
 
 interface SubCategory {
   id: string;
   name: string;
+  image: string;
 }
 
 interface FilterModalProps {

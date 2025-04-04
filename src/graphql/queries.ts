@@ -100,6 +100,14 @@ export const GET_ARTISTS = gql`
       hostRating
       hostReviewCount
       pastBookings
+      youtubeDisplay
+      youtubeId
+      instagramDisplay
+      instagramUsername
+      facebookDisplay
+      facebookId
+      xDisplay
+      xUsername
     }
   }
 `;
@@ -125,6 +133,14 @@ export const GET_FAVORITE_ARTISTS = gql`
       hostRating
       hostReviewCount
       pastBookings
+      youtubeDisplay
+      youtubeId
+      instagramDisplay
+      instagramUsername
+      facebookDisplay
+      facebookId
+      xDisplay
+      xUsername
     }
   }
 `;
@@ -166,6 +182,7 @@ export const GET_ARTIST_PORTFOLIO = gql`
       mediaType
       mediaUrl
       thumbnail
+      source
     }
   }
 `;
@@ -186,17 +203,6 @@ export const GET_ARTIST_REVIEWS = gql`
 export const GET_APPLICATIONS = gql`query { applications { id event { id title } status } }`;
 export const GET_EVENTS_TO_APPLY = gql`query { events { id title date } }`;
 
-export const GET_TRENDING_ARTISTS = gql`
-  query GetTrendingArtists {
-    trendingArtists {
-      id
-      displayName
-      rating
-      reviewCount
-      subCategories
-    }
-  }
-`;
 
 
 export const GET_EVENT_ARTISTS = gql`
@@ -212,6 +218,14 @@ export const GET_EVENT_ARTISTS = gql`
         rating
         reviewCount
         pastBookings
+        youtubeDisplay
+        youtubeId
+        instagramDisplay
+        instagramUsername
+        facebookDisplay
+        facebookId
+        xDisplay
+        xUsername
       }
     }
   }
@@ -260,6 +274,14 @@ export const GET_USER = gql`
       budget
       categories
       subcategories
+      youtubeDisplay
+      youtubeId
+      instagramDisplay
+      instagramUsername
+      facebookDisplay
+      facebookId
+      xDisplay
+      xUsername
     }
   }
 `;
@@ -268,9 +290,31 @@ export const GET_BOOKINGS = gql`
   query GetBookings($userId: ID!) {
     bookings(userId: $userId) {
       id
-      event { id title }
+      userId
+      event {
+        id
+        title
+        banner
+        dateTime
+        location {
+          address
+        }
+        host {
+          id
+          fullName
+          profilePicture
+        }
+        type
+        budget {
+          min
+          max
+        }
+        status
+      }
       status
       date
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -307,6 +351,7 @@ export const GET_PORTFOLIO = gql`
       mediaType
       mediaUrl
       thumbnail
+      source
     }
   }
 `;
@@ -355,6 +400,7 @@ export const ADD_PORTFOLIO_ITEM = gql`
       mediaType
       mediaUrl
       thumbnail
+      source
     }
   }
 `;
@@ -422,6 +468,81 @@ export const GET_EVENTS_WITH_FILTERS = gql`
         rating
         reviewsCount
         pastEventsCount
+      }
+      applicationsCount
+      isFavorite
+      userApplicationStatus
+    }
+  }
+`;
+
+export const GET_TOP_CATEGORIES = gql`
+  query GetTopCategories {
+    categories {
+      id
+      name
+      image
+    }
+  }
+`;
+
+export const GET_TOP_ARTISTS = gql`
+  query GetTopArtists {
+    artists {
+      id
+      phoneNumber
+      username
+      fullName
+      email
+      profilePicture
+      isArtist
+      bio
+      budget
+      location
+      artistType
+      categoryIDs
+      subCategoryIDs
+      artistRating
+      artistReviewCount
+      hostRating
+      hostReviewCount
+      pastBookings
+      youtubeDisplay
+      youtubeId
+      instagramDisplay
+      instagramUsername
+      facebookDisplay
+      facebookId
+      xDisplay
+      xUsername
+    }
+  }
+`;
+
+export const GET_TOP_EVENTS = gql`
+  query GetTopEvents {
+    events {
+      id
+      title
+      banner
+      dateTime
+      location {
+        address
+        lat
+        lng
+      }
+      status
+      eventType
+      budget {
+        min
+        max
+      }
+      category
+      subcategories
+      host { 
+        id 
+        displayName 
+        profilePicture
       }
       applicationsCount
       isFavorite

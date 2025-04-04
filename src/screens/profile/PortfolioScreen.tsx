@@ -1,247 +1,388 @@
 // src/screens/PortfolioScreen.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, Alert, ActivityIndicator, Linking, TouchableOpacity } from 'react-native';
-import { Button, Menu, IconButton } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, SafeAreaView } from 'react-native';
+import { Button, Menu, IconButton, useTheme } from 'react-native-paper';
 import { useQuery, useMutation } from '@apollo/client';
-import { useAuthStore } from '../../stores/authStore';
-import { usePortfolioStore } from '../../stores/portfolioStore';
+import { useAuthStore, UserProfile } from '../../stores/authStore';
+import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
 import { GET_PORTFOLIO, ADD_PORTFOLIO_ITEM, REMOVE_PORTFOLIO_ITEM } from '../../graphql/queries';
 
-// Simulated social media media (with mediaType, mediaUrl, and thumbnail)
-const SOCIAL_MEDIA_MEDIA = {
-  instagram: [
-    {
-      id: 'ig1',
-      mediaType: 'IMAGE',
-      mediaUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
-      thumbnail: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&h=100&fit=crop',
-    },
-    {
-      id: 'ig2',
-      mediaType: 'IMAGE',
-      mediaUrl: 'https://images.unsplash.com/photo-1519046904884-53103b34b206',
-      thumbnail: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=100&h=100&fit=crop',
-    },
-  ],
-  youtube: [
-    {
-      id: 'yt1',
-      mediaType: 'VIDEO',
-      mediaUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
-    },
-    {
-      id: 'yt2',
-      mediaType: 'VIDEO',
-      mediaUrl: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
-      thumbnail: 'https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg',
-    },
-  ],
+// YouTube OAuth configuration
+const discovery = {
+  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
 };
 
-export const PortfolioScreen = () => {
-  const { currentUser:user } = useAuthStore();
-  const { portfolio, setPortfolio, addMedia, removeMedia } = usePortfolioStore();
-  const [menuVisible, setMenuVisible] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState(null);
-  const [loadingThumbnails, setLoadingThumbnails] = useState(false);
+interface MediaItem {
+  id: string;
+  mediaType: 'IMAGE' | 'VIDEO';
+  mediaUrl: string;
+  thumbnail: string;
+  source: 'youtube' | 'instagram' | 'facebook' | 'x';
+}
 
-  const { data, loading, error } = useQuery(GET_PORTFOLIO, {
-    variables: { userId: user?.id },
-    skip: !user,
+export const PortfolioScreen = ({navigation}: any) => {
+  const { currentUser } = useAuthStore();
+  const theme = useTheme();
+  const [portfolio, setPortfolio] = useState<MediaItem[]>([]);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [socialMediaItems, setSocialMediaItems] = useState<MediaItem[]>([]);
+  const [page, setPage] = useState(1);
+
+  // Fetch portfolio data
+  const { data, loading: queryLoading } = useQuery(GET_PORTFOLIO, {
+    variables: { userId: currentUser?.id },
+    skip: !currentUser,
   });
 
   useEffect(() => {
-    if (data?.portfolio) {
-      setPortfolio(data.portfolio);
-    }
-  }, [data, setPortfolio]);
+    if (data?.portfolio) setPortfolio(data.portfolio);
+  }, [data]);
 
+  // Mutations for backend sync
   const [addPortfolioItem] = useMutation(ADD_PORTFOLIO_ITEM, {
-    update: (cache, { data: { addPortfolioItem } }) => {
-      cache.modify({
-        fields: {
-          portfolio(existingPortfolio = []) {
-            return [...existingPortfolio, addPortfolioItem];
-          },
-        },
-      });
-    },
-    onError: (error) => {
-      Alert.alert('Error', error.message);
-      removeMedia(addPortfolioItem.id); // Rollback on failure
-    },
+    onError: (error) => Alert.alert('Error', error.message),
   });
-
   const [removePortfolioItem] = useMutation(REMOVE_PORTFOLIO_ITEM, {
-    update: (cache, { data: { removePortfolioItem } }, { variables }) => {
-      if (removePortfolioItem) {
-        cache.modify({
-          fields: {
-            portfolio(existingPortfolio = []) {
-              return existingPortfolio.filter((item) => item.id !== variables.id);
-            },
-          },
-        });
-      }
-    },
-    onError: (error) => {
-      Alert.alert('Error', error.message);
-      addMedia({ id: variables.id, userId: user.id, mediaType: 'IMAGE', mediaUrl: 'restored', thumbnail: 'restored' }); // Rollback on failure
-    },
+    onError: (error) => Alert.alert('Error', error.message),
   });
 
-  if (loading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error: {error.message}</Text>;
+  // YouTube Authentication
+  const [request, response, promptAsync] = useAuthRequest(
+    {
+      clientId: 'YOUR_YOUTUBE_CLIENT_ID',
+      scopes: ['https://www.googleapis.com/auth/youtube.readonly'],
+      redirectUri: makeRedirectUri({ scheme: 'your.app' }),
+    },
+    discovery
+  );
 
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { code } = response.params;
+      fetchYoutubeMedia(code);
+    }
+  }, [response]);
+
+  const fetchYoutubeMedia = async (code: string, nextPageToken?: string) => {
+    setLoading(true);
+    try {
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code,
+          client_id: 'YOUR_YOUTUBE_CLIENT_ID',
+          client_secret: 'YOUR_YOUTUBE_CLIENT_SECRET',
+          redirect_uri: makeRedirectUri({ scheme: 'your.app' }),
+          grant_type: 'authorization_code',
+        }),
+      });
+      const { access_token } = await tokenResponse.json();
+
+      const mediaResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet&mine=true&maxResults=10&pageToken=${nextPageToken || ''}`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      );
+      const mediaData = await mediaResponse.json();
+      const items = mediaData.items.map((item: any) => ({
+        id: item.id,
+        mediaType: 'VIDEO' as const,
+        mediaUrl: `https://www.youtube.com/watch?v=${item.id}`,
+        thumbnail: item.snippet.thumbnails.high.url,
+        source: 'youtube' as const,
+      }));
+      setSocialMediaItems((prev) => [...prev, ...items]);
+      if (mediaData.nextPageToken) setPage((prev) => prev + 1);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch YouTube media');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Menu handlers
   const openMenu = () => setMenuVisible(true);
   const closeMenu = () => setMenuVisible(false);
 
-  const selectPlatform = (platform) => {
-    setSelectedPlatform(platform);
+  const selectPlatform = (platform: string) => {
+    // setSelectedPlatform(platform);
+    // setSocialMediaItems([]);
+    // setLoading(true);
+    // const platformAuthMap: Record<string, keyof UserProfile> = {
+    //   youtube: 'youtubeId',
+    //   instagram: 'instagramUsername',
+    //   facebook: 'facebookId',
+    //   x: 'xUsername',
+    // };
+    // const authField = platformAuthMap[platform];
+    // if (currentUser && currentUser[authField]) {
+    //   if (platform === 'youtube') fetchYoutubeMedia('mock-code'); // Replace with real token
+    //   else {
+    //     Alert.alert('Info', `${platform} integration not implemented yet`);
+    //     setLoading(false);
+    //   }
+    // } else {
+    //   if (platform === 'youtube') promptAsync();
+    //   else Alert.alert('Authentication Required', `Please authenticate with ${platform}`);
+    //   setLoading(false);
+    // }
     closeMenu();
   };
 
-  const handleAddMedia = async (media) => {
-    setLoadingThumbnails(true);
+  // Portfolio management with optimistic updates
+  const handleAddMedia = async (media: MediaItem) => {
+    if (portfolio.length >= 9) {
+      Alert.alert('Limit Reached', 'You can only add up to 9 items.');
+      return;
+    }
+    const newMedia = { ...media, id: `p${Date.now()}`, userId: currentUser?.id };
+    setPortfolio((prev) => [...prev, newMedia]); // Optimistic add
     try {
-      const newMedia = {
-        id: `p${Date.now()}`,
-        userId: user?.id,
-        mediaType: media.mediaType,
-        mediaUrl: media.mediaUrl,
-        thumbnail: media.thumbnail,
-      };
-      addMedia(newMedia); // Optimistic update
       await addPortfolioItem({
         variables: {
-          userId: user?.id,
+          userId: currentUser?.id,
           input: {
             mediaType: media.mediaType,
             mediaUrl: media.mediaUrl,
             thumbnail: media.thumbnail,
+            source: media.source,
           },
         },
       });
-    } catch (err) {
-      Alert.alert('Error', 'Failed to add media');
-      removeMedia(media.id); // Rollback on failure
-    } finally {
-      setLoadingThumbnails(false);
+    } catch (error) {
+      setPortfolio((prev) => prev.filter((item) => item.id !== newMedia.id)); // Rollback
     }
   };
 
-  const handleRemoveMedia = (mediaId) => {
-    removeMedia(mediaId); // Optimistic update
-    removePortfolioItem({ variables: { id: mediaId } });
+  const handleRemoveMedia = async (id: string) => {
+    Alert.alert(
+      'Remove Media',
+      'Are you sure you want to remove this item from your portfolio?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            const itemToRemove = portfolio.find((item) => item.id === id);
+            setPortfolio((prev) => prev.filter((item) => item.id !== id)); // Optimistic remove
+            try {
+              await removePortfolioItem({ variables: { id } });
+            } catch (error) {
+              if (itemToRemove) {
+                setPortfolio((prev) => [...prev, itemToRemove]); // Rollback
+                Alert.alert('Error', 'Failed to remove item');
+              }
+            }
+          }
+        }
+      ]
+    );
   };
 
-  const handleViewMedia = (mediaUrl, mediaType) => {
-    if (mediaType === 'VIDEO') {
-      Linking.openURL(mediaUrl).catch(() => Alert.alert('Error', 'Unable to open video'));
-    } else {
-      // For images, you could navigate to a full-screen image viewer
-      Alert.alert('View Image', 'Full-screen image viewer not implemented yet');
-    }
-  };
+  // Render functions
+  const renderMediaItem = ({ item }: { item: MediaItem }) => (
+    <TouchableOpacity style={styles.mediaItem} onPress={() => handleAddMedia(item)}>
+      <View style={styles.thumbnailContainer}>
+        <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+        {item.mediaType === 'VIDEO' && (
+          <View style={styles.videoOverlay}>
+            <MaterialIcons name="play-circle-filled" size={24} color="white" />
+          </View>
+        )}
+      </View>
+      <Text style={styles.mediaType}>{item.mediaType}</Text>
+    </TouchableOpacity>
+  );
+
+  const renderPortfolioItem = ({ item }: { item: MediaItem | null }) =>
+    item ? (
+      <View style={styles.portfolioItem}>
+        <View style={styles.thumbnailContainer}>
+          <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+          {item.mediaType === 'VIDEO' && (
+            <View style={styles.videoOverlay}>
+              <MaterialIcons name="play-circle-filled" size={24} color="white" />
+            </View>
+          )}
+          <IconButton
+            icon="close-circle"
+            size={20}
+            onPress={() => handleRemoveMedia(item.id)}
+            style={styles.removeButton}
+            iconColor={theme.colors.error}
+          />
+        </View>
+      </View>
+    ) : (
+      <View style={styles.placeholder}>
+        <MaterialIcons name="add-a-photo" size={24} color="#999" />
+      </View>
+    );
+
+  if (!currentUser) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Please log in to manage your portfolio.</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Portfolio</Text>
-      <Menu
-        visible={menuVisible}
-        onDismiss={closeMenu}
-        anchor={
-          <Button mode="contained" onPress={openMenu} style={styles.addButton}>
-            Add Media from Social Media
-          </Button>
-        }
-      >
-        <Menu.Item onPress={() => selectPlatform('instagram')} title="Instagram" />
-        <Menu.Item onPress={() => selectPlatform('youtube')} title="YouTube" />
-      </Menu>
+    <SafeAreaView style={{flex: 1}} edges={['top', 'left', 'right']}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <IconButton
+            icon="arrow-left"
+            size={24}
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          />
+          <Text style={styles.title}>Manage Portfolio</Text>
+        </View>
 
-      {selectedPlatform && (
-        <View style={styles.mediaSelection}>
-          <Text style={styles.subtitle}>Select Media from {selectedPlatform}</Text>
-          {loadingThumbnails ? (
+        {/* Enhanced Social Media Selection Menu with Icons */}
+        <Menu
+          visible={menuVisible}
+          onDismiss={closeMenu}
+          anchor={
+            <Button mode="contained" onPress={openMenu} style={styles.addButton}>
+              Import from Social Media
+            </Button>
+          }
+        >
+          <Menu.Item
+            onPress={() => selectPlatform('youtube')}
+            title="YouTube"
+            leadingIcon={() => <FontAwesome5 name="youtube" size={20} color="#FF0000" />}
+          />
+          <Menu.Item
+            onPress={() => selectPlatform('instagram')}
+            title="Instagram"
+            leadingIcon={() => <FontAwesome5 name="instagram" size={20} color="#E1306C" />}
+          />
+          <Menu.Item
+            onPress={() => selectPlatform('facebook')}
+            title="Facebook"
+            leadingIcon={() => <FontAwesome5 name="facebook" size={20} color="#1877F2" />}
+          />
+          <Menu.Item
+            onPress={() => selectPlatform('x')}
+            title="X"
+            leadingIcon={() => <FontAwesome5 name="twitter" size={20} color="#1DA1F2" />}
+          />
+        </Menu>
+
+        {/* Improved Media Selector */}
+        {selectedPlatform && (
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>Select from {selectedPlatform}</Text>
+            {loading ? (
+              <ActivityIndicator size="large" color="#6B48FF" />
+            ) : (
+              <FlatList
+                data={socialMediaItems}
+                renderItem={renderMediaItem}
+                keyExtractor={(item) => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                onEndReached={() => {
+                  if (selectedPlatform === 'youtube' && currentUser?.youtubeId) {
+                    fetchYoutubeMedia('mock-code', 'nextPageToken'); // Replace with real token
+                  }
+                }}
+                onEndReachedThreshold={0.5}
+              />
+            )}
+          </View>
+        )}
+
+        {/* 3x3 Grid with Placeholders */}
+        <View style={styles.section}>
+          <Text style={styles.subtitle}>Your Portfolio ({portfolio.length}/9)</Text>
+          {queryLoading ? (
             <ActivityIndicator size="large" color="#6B48FF" />
           ) : (
             <FlatList
-              data={SOCIAL_MEDIA_MEDIA[selectedPlatform]}
-              renderItem={({ item }) => (
-                <View style={styles.mediaItem}>
-                  <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
-                  <Text style={styles.mediaType}>{item.mediaType}</Text>
-                  <Button
-                    mode="contained"
-                    onPress={() => handleAddMedia(item)}
-                    style={styles.selectButton}
-                  >
-                    Add to Portfolio
-                  </Button>
-                </View>
-              )}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
+              data={[...portfolio, ...Array(9 - portfolio.length).fill(null)]}
+              renderItem={renderPortfolioItem}
+              keyExtractor={(item, index) => item?.id || `placeholder-${index}`}
+              numColumns={3}
+              showsVerticalScrollIndicator={false}
             />
           )}
         </View>
-      )}
-
-      <Text style={styles.subtitle}>Your Portfolio</Text>
-      <FlatList
-        data={portfolio}
-        renderItem={({ item }) => (
-          <View style={styles.gridItem}>
-            <TouchableOpacity onPress={() => handleViewMedia(item.mediaUrl, item.mediaType)}>
-              <Image
-                source={{ uri: item.thumbnail }}
-                style={styles.thumbnail}
-                onError={() => Alert.alert('Error', 'Failed to load thumbnail')}
-              />
-              {item.mediaType === 'VIDEO' && (
-                <IconButton
-                  icon="play-circle"
-                  color="#fff"
-                  size={30}
-                  style={styles.playIcon}
-                />
-              )}
-            </TouchableOpacity>
-            <Text style={styles.mediaType}>{item.mediaType}</Text>
-            <Button
-              mode="outlined"
-              onPress={() => handleRemoveMedia(item.id)}
-              style={styles.removeButton}
-            >
-              Remove
-            </Button>
-          </View>
-        )}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        ListEmptyComponent={<Text style={styles.noData}>No media available</Text>}
-      />
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#F5F5F5' },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 16 },
+  title: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    color: '#333', 
+    flex: 1 
+  },
   subtitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginVertical: 8 },
-  addButton: { marginBottom: 16, backgroundColor: '#6B48FF' },
-  mediaSelection: { marginBottom: 16 },
+  section: { marginBottom: 16 },
+  addButton: { backgroundColor: '#6B48FF', marginBottom: 16 },
   mediaItem: { marginRight: 8, alignItems: 'center' },
-  gridItem: { flex: 1, margin: 4, alignItems: 'center' },
+  portfolioItem: { flex: 1, padding: 4},
   thumbnail: { width: 100, height: 100, borderRadius: 8 },
-  playIcon: { position: 'absolute', top: 35, left: 35, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-  mediaType: { fontSize: 12, color: '#666', marginTop: 4 },
-  selectButton: { marginTop: 4, backgroundColor: '#6B48FF' },
-  removeButton: { marginTop: 4 },
-  noData: { fontSize: 16, color: '#666', textAlign: 'center', marginTop: 16 },
+  removeButton: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    margin: 0,
+    padding: 0,
+    backgroundColor: 'white',
+  },
+  placeholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    backgroundColor: '#E0E0E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 4,
+  },
+  mediaType: { fontSize: 12, color: '#666' },
+  errorText: { fontSize: 16, color: '#FF0000', textAlign: 'center' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  backButton: {
+    marginRight: 8,
+  },
+  thumbnailContainer: {
+    position: 'relative',
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  videoOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default PortfolioScreen;

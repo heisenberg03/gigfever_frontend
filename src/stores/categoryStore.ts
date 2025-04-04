@@ -8,9 +8,11 @@ const GET_CATEGORIES = gql`
     categories {
       id
       name
+      image
       subCategories {
         id
         name
+        image
       }
     }
   }
@@ -19,11 +21,13 @@ const GET_CATEGORIES = gql`
 export interface SubCategory {
   id: string;
   name: string;
+  image: string;
 }
 
 export interface Category {
   id: string;
   name: string;
+  image: string;
   subCategories: SubCategory[];
 }
 

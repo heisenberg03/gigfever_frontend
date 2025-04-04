@@ -7,7 +7,7 @@ import { theme } from '../theme';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useAuthStore } from '../stores/authStore';
 import { useFetchNotifications } from '../stores/notificationStore';
-import { useFetchCategories } from '../stores/categoryStore';
+import { SubCategory, useFetchCategories } from '../stores/categoryStore';
 
 // Screen imports
 import HomeScreen from '../screens/HomeScreen';
@@ -22,7 +22,7 @@ import ArtistProfileScreen from '../screens/ArtistProfileScreen';
 import CreateEditEventScreen from '../screens/CreateEditEventScreen';
 import { InvitesScreen } from '../screens/profile/InvitesScreen';
 import { BookingsScreen } from '../screens/profile/BookingsScreen';
-import { MyEventsSection } from '../screens/profile/MyEventsSection';
+import { MyEventsScreen } from '../screens/profile/MyEventsScreen';
 import { PortfolioScreen } from '../screens/profile/PortfolioScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -31,6 +31,7 @@ import FavoriteArtistsScreen from '../screens/FavoriteArtistsScreen';
 import ChatListScreen from '../screens/ChatListScreen';
 import { User } from '../types';
 import ChatScreen from '../screens/ChatScreen';
+import CategoryDetailsScreen from '../screens/CategoryDetailsScreen';
 
 // Navigation Types
 export type RootStackParamList = {
@@ -68,6 +69,19 @@ export type RootStackParamList = {
   InviteArtist: { artistId: number };
   FavoriteEvents: undefined;
   FavoriteArtists: undefined;
+  CategoryDetails: {
+    categoryId: string;
+    categoryName: string;
+    subCategories: Array<{
+      id: string;
+      name: string;
+      image: string;
+    }>;
+  };
+  SubCategoryDetails: {
+    subCategoryId: string;
+    subCategoryName: string;
+  };
 };
 
 // Navigation Instances
@@ -152,10 +166,11 @@ const MainApp = () => {
         <Stack.Screen name="PortfolioScreen" component={PortfolioScreen} />
         <Stack.Screen name="BookingsScreen" component={BookingsScreen} />
         <Stack.Screen name="InvitesScreen" component={InvitesScreen} />
-        <Stack.Screen name="MyEventsScreen" component={MyEventsSection} />
+        <Stack.Screen name="MyEventsScreen" component={MyEventsScreen} />
         <Stack.Screen name="EditProfileScreen"component={EditProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="FavoriteEvents" component={FavoriteEventsScreen} />
+        <Stack.Screen name="CategoryDetails" component={CategoryDetailsScreen} />
         <Stack.Screen name="FavoriteArtists" component={FavoriteArtistsScreen} />
       </Stack.Navigator>
     </ErrorBoundary>

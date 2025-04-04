@@ -20,7 +20,7 @@ const OTPScreen = ({ route, navigation }: any) => {
         email:'dumjubmummy.jefhuowiucehbmy@email.som',
         fullName: 'Test User',
         username: 'Test',
-        isArtist: false,
+        isArtist: true,
         bio: 'Event organizer with a passion for music.',
         budget: 5000,
         location: 'Mumbai',
@@ -31,6 +31,14 @@ const OTPScreen = ({ route, navigation }: any) => {
         hostRating: 4.3,
         hostReviewCount: 5,
         subCategoryIDs: ['1','4'],
+        youtubeDisplay: true,
+        youtubeId: '1234567890',
+        instagramDisplay: true,
+        instagramUsername: 'testuser',
+        facebookDisplay: true,
+        facebookId: '1234567890',
+        xDisplay: true, 
+        xUsername: 'testuser',
       };
 
     authenticate(mockUser, mockToken);

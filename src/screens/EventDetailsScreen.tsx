@@ -475,17 +475,6 @@ const EventDetailsScreen = () => {
                   <Marker coordinate={{ latitude: event.location.lat, longitude: event.location.lng }} />
                 </MapView>
                 <View style={styles.mapActionRow}>
-                  {Platform.OS === 'ios' && (
-                    <Button 
-                      mode="outlined" 
-                      onPress={toggleMapProvider} 
-                      style={styles.mapProviderButton}
-                      icon={mapProvider === PROVIDER_GOOGLE ? "apple-ios" : "google"}
-                    >
-                      {mapProvider === PROVIDER_GOOGLE ? "Apple Maps" : "Google Maps"}
-                    </Button>
-                  )}
-
                   <Button
                     mode="contained"
                     icon="map-marker"
