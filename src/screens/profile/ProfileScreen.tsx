@@ -20,16 +20,8 @@ import ConfirmationDialog from '../../components/ConfirmationDialog';
 import RatingBox from '../../components/RatingBox';
 import * as Linking from 'expo-linking';
 import { gql, useMutation } from '@apollo/client';
+import { LINK_SOCIAL_MEDIA } from '../../graphql/queries';
 
-// GraphQL Mutation for Linking Social Media
-const LINK_SOCIAL_MEDIA = gql`
-  mutation LinkSocialMedia($platform: String!, $authCode: String!) {
-    linkSocialMedia(platform: $platform, authCode: $authCode) {
-      platform
-      identifier
-    }
-  }
-`;
 
 interface User {
   id: string;

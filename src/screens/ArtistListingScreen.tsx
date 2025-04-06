@@ -21,43 +21,7 @@ import FilterModal from '../components/FilterModal';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
-
-// GraphQL Query
-const GET_ARTISTS = gql`
-  query GetArtists(
-    $search: String
-    $categoryId: ID
-    $subCategoryIds: [ID!]
-    $location: String
-    $minBudget: Int
-    $maxBudget: Int
-    $minRating: Float
-    $sortBy: String
-  ) {
-    artists(
-      search: $search
-      categoryId: $categoryId
-      subCategoryIds: $subCategoryIds
-      location: $location
-      minBudget: $minBudget
-      maxBudget: $maxBudget
-      minRating: $minRating
-      sortBy: $sortBy
-    ) {
-      id
-      fullName
-      username
-      artistType
-      location
-      artistRating
-      artistReviewCount
-      budget
-      categoryIDs
-      subCategoryIDs
-      profilePicture
-    }
-  }
-`;
+import { GET_ARTISTS } from '../graphql/queries';
 
 const ScrollViewAnimated = Animated.createAnimatedComponent(ScrollView);
 

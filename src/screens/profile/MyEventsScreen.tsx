@@ -8,48 +8,11 @@ import { format, parseISO, isPast } from 'date-fns';
 import { useEventStore } from '../../stores/eventStore';
 import { useAuthStore } from '../../stores/authStore';
 import MyEventCard from '../../components/MyEventCard';
+import { GET_MY_EVENTS } from '../../graphql/queries';
+import { CANCEL_EVENT } from '../../graphql/mutations';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const GET_MY_EVENTS = gql`
-  query GetMyEvents($userId: ID!) {
-    events(userId: $userId) {
-      id
-      title
-      description
-      banner
-      dateTime
-      location {
-        lat
-        lng
-        address
-      }
-      status
-      type
-      eventType
-      budget {
-        min
-        max
-      }
-      category
-      subcategories
-      applicationsCount
-      confirmedArtist {
-        fullName
-        profilePicture
-      }
-    }
-  }
-`;
-
-const CANCEL_EVENT = gql`
-  mutation CancelEvent($eventId: ID!) {
-    cancelEvent(eventId: $eventId) {
-      id
-      status
-    }
-  }
-`;
 
 export const MyEventsScreen: React.FC<any> = ({ navigation }) => {
   const theme = useTheme();

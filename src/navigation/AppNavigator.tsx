@@ -190,6 +190,8 @@ const AuthStack = () => (
 // Root Navigator
 export default function AppNavigator() {
   const { isAuthenticated } = useAuthStore();
+  useFetchCategories();
+  useFetchNotifications();
 
   return (
     <ErrorBoundary>

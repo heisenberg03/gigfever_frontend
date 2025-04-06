@@ -11,8 +11,7 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
-import { Appbar, Searchbar, useTheme } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Appbar, Badge, Searchbar, useTheme } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useQuery } from '@apollo/client';
 import { GET_TOP_ARTISTS, GET_TOP_EVENTS } from '../graphql/queries';
@@ -22,12 +21,12 @@ import { theme } from '../theme';
 import { useCategoryStore } from '../stores/categoryStore';
 import { useAuthStore } from '../stores/authStore';
 import { useNotificationStore } from '../stores/notificationStore';
-import Animated, { 
-  useAnimatedScrollHandler, 
-  useSharedValue, 
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
   useAnimatedStyle,
   interpolate,
-  Extrapolate 
+  Extrapolate
 } from 'react-native-reanimated';
 
 const HEADER_MAX_HEIGHT = Platform.OS === 'ios' ? 235 : 185;
@@ -235,7 +234,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
   };
 
   useEffect(() => {
-    StatusBar.setBarStyle('light-content');
+    StatusBar.setBarStyle('dark-content');
     StatusBar.setBackgroundColor(theme.colors.primary);
   }, []);
 
@@ -246,7 +245,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
       <Animated.View style={[styles.header, headerAnimatedStyle]}>
         <Appbar.Header style={styles.appbar}>
           <View style={styles.locationContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.locationButton}
               onPress={handleLocationPress}
             >
@@ -266,18 +265,29 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                 style={styles.headerAction}
               />
             </Animated.View>
-            <Appbar.Action
-              icon="bell"
-              size={24}
-              iconColor="#FFF"
-              onPress={() => navigation.navigate('Notifications')}
-              style={styles.headerAction}
-            />
+            <View style={styles.notificationContainer}>
+              <Appbar.Action
+                icon="bell"
+                size={24}
+                iconColor="#FFF"
+                onPress={() => navigation.navigate('Notifications')}
+                style={styles.headerAction}
+              />
+              {unreadGeneralCount > 0 && (
+                <Badge
+                  visible={true}
+                  size={20}
+                  style={styles.notificationBadge}
+                >
+                  {unreadGeneralCount}
+                </Badge>
+              )}
+            </View>
           </View>
         </Appbar.Header>
 
         <Animated.View style={[styles.headerContent, searchContainerStyle]}>
-          <Text style={styles.welcomeText}>Discover your Interests</Text>
+          <Text style={styles.welcomeText}>Explore your Interests</Text>
           <Searchbar
             placeholder="Search interests"
             onChangeText={handleSearch}
@@ -287,7 +297,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
         </Animated.View>
       </Animated.View>
 
-      
+
 
       <Animated.ScrollView
         style={styles.content}
@@ -296,33 +306,33 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
         contentContainerStyle={styles.scrollContent} // Add this line
       >
         {/* Fast Action Buttons */}
-      <View style={styles.fastActionsContainer}>
-        <TouchableOpacity
-          style={[styles.fastActionButton, { backgroundColor: theme.colors.primary }]}
-          onPress={() => handleFastActionPress('myEvents')}
-        >
-          <MaterialIcons name="event" size={20} color="#fff" />
-          <Text style={styles.fastActionText}>My Events</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.fastActionButton, { backgroundColor: theme.colors.secondary }]}
-          onPress={() => handleFastActionPress('invite')}
-        >
-          <MaterialIcons name="person-add" size={20} color="#fff" />
-          <Text style={styles.fastActionText}>Invite Artist</Text>
-        </TouchableOpacity>
-
-        {currentUser?.isArtist && (
+        <View style={styles.fastActionsContainer}>
           <TouchableOpacity
-            style={[styles.fastActionButton, { backgroundColor: theme.colors.tertiary }]}
-            onPress={() => handleFastActionPress('myBookings')}
+            style={[styles.fastActionButton, { backgroundColor: theme.colors.primary }]}
+            onPress={() => handleFastActionPress('myEvents')}
           >
-            <MaterialIcons name="book" size={20} color="#fff" />
-            <Text style={styles.fastActionText}>My Bookings</Text>
+            <MaterialIcons name="event" size={20} color="#fff" />
+            <Text style={styles.fastActionText}>My Events</Text>
           </TouchableOpacity>
-        )}
-      </View>
+
+          <TouchableOpacity
+            style={[styles.fastActionButton, { backgroundColor: theme.colors.secondary }]}
+            onPress={() => handleFastActionPress('invite')}
+          >
+            <MaterialIcons name="person-add" size={20} color="#fff" />
+            <Text style={styles.fastActionText}>Invite Artist</Text>
+          </TouchableOpacity>
+
+          {currentUser?.isArtist && (
+            <TouchableOpacity
+              style={[styles.fastActionButton, { backgroundColor: theme.colors.tertiary }]}
+              onPress={() => handleFastActionPress('myBookings')}
+            >
+              <MaterialIcons name="book" size={20} color="#fff" />
+              <Text style={styles.fastActionText}>My Bookings</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* Top Categories */}
         <View style={styles.section}>
@@ -395,7 +405,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
             <ActivityIndicator size="large" color={theme.colors.primary} />
           ) : topEvents.length > 0 ? (
             <ScrollView
-            style={styles.categoryScroll}
+              style={styles.categoryScroll}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.eventScrollContent}
@@ -439,7 +449,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerAction: {
-    marginHorizontal: 4,
+    marginHorizontal: 8,
+  },
+  notificationContainer: {
+    position: 'relative',
+    marginRight: 16,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#FF4444',
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -556,7 +576,7 @@ const styles = StyleSheet.create({
   },
   eventScrollContent: {
     gap: 12,
-    padding: 16,
+    paddingHorizontal: 24,
     paddingBottom: 16, // Added extra padding for Android
   },
   emptyText: {

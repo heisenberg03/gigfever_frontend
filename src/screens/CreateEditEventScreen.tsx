@@ -6,54 +6,13 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import MapView, { Marker } from 'react-native-maps';
 import tw from 'tailwind-react-native-classnames';
-
-const CREATE_EVENT = gql`
-  mutation CreateEvent(
-    $title: String!, $type: String!, $categories: [String!]!, $subcategories: [String!]!,
-    $date: String!, $time: String!, $location: LocationInput!, $description: String!,
-    $budget: BudgetInput!
-  ) {
-    createEvent(
-      title: $title, type: $type, categories: $categories, subcategories: $subcategories,
-      date: $date, time: $time, location: $location, description: $description, budget: $budget
-    ) { id title }
-  }
-`;
-
-const UPDATE_EVENT = gql`
-  mutation UpdateEvent(
-    $id: ID!, $title: String, $type: String, $categories: [String], $subcategories: [String],
-    $date: String, $time: String, $location: LocationInput, $description: String,
-    $budget: BudgetInput
-  ) {
-    updateEvent(
-      id: $id, title: $title, type: $type, categories: $categories, subcategories: $subcategories,
-      date: $date, time: $time, location: $location, description: $description, budget: $budget
-    ) { id title }
-  }
-`;
-
-const GET_EVENT = gql`
-  query GetEvent($id: ID!) {
-    event(id: $id) {
-      id
-      title
-      type
-      categories
-      subcategories
-      date
-      time
-      location { lat lng address }
-      description
-      budget { min max }
-    }
-  }
-`;
+import { GET_EVENT_DETAILS } from '../graphql/queries';
+import { CREATE_EVENT, UPDATE_EVENT } from '../graphql/mutations';
 
 const CreateEditEventScreen = ({ route, navigation }) => {
   const { eventId } = route.params || {};
   const isEditing = !!eventId;
-  const { data, loading } = useQuery(GET_EVENT, { variables: { id: eventId }, skip: !isEditing });
+  const { data, loading } = useQuery(GET_EVENT_DETAILS, { variables: { id: eventId }, skip: !isEditing });
 
   const [form, setForm] = useState({
     title: '',

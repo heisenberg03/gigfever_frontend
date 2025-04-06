@@ -33,55 +33,9 @@ import InvitesScreen from './InvitesScreen';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { Event } from '../../stores/bookingStore';
 import { openInMaps } from '../../utils/openInMaps';
+import { UPDATE_BOOKING } from '../../graphql/mutations';
+import { GET_BOOKINGS } from '../../graphql/queries';
 
-const GET_BOOKINGS = gql`
-  query GetBookings($userId: ID!) {
-    bookings(userId: $userId) {
-      id
-      userId
-      event {
-        id
-        title
-        banner
-        dateTime
-        location {
-          address
-          lat
-          lng
-        }
-        host {
-          id
-          fullName
-          profilePicture
-        }
-        type
-        budget {
-          min
-          max
-        }
-        status
-      }
-      status
-      date
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-const UPDATE_BOOKING = gql`
-  mutation UpdateBookingStatus($bookingId: ID!, $status: String!) {
-    updateBookingStatus(bookingId: $bookingId, status: $status) {
-      id
-      status
-      updatedAt
-      event {
-        id
-        title
-      }
-    }
-  }
-`;
 
 const Tab = createMaterialTopTabNavigator();
 

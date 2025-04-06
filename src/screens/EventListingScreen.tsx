@@ -19,7 +19,7 @@ import EventCard from '../components/EventCard';
 import { theme } from '../theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FilterModal from '../components/FilterModal';
-import { GET_EVENTS_WITH_FILTERS } from '../graphql/queries';
+import { GET_EVENTS } from '../graphql/queries';
 import { useAuthStore } from '../stores/authStore';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -68,7 +68,7 @@ const EventListingScreen = () => {
   };
 
   // Fetch events
-  const { data, loading: eventsLoading, error, refetch } = useQuery(GET_EVENTS_WITH_FILTERS, {
+  const { data, loading: eventsLoading, error, refetch } = useQuery(GET_EVENTS, {
     variables: queryVariables,
     onError: (err) => console.error('Error fetching events:', err),
     notifyOnNetworkStatusChange: true,

@@ -1,22 +1,9 @@
 import { gql, useQuery } from '@apollo/client';
 import { useEffect } from 'react';
 import { create } from 'zustand';
+import { GET_CATEGORIES } from '../graphql/queries';
 
 // GraphQL query to fetch categories and their subcategories
-const GET_CATEGORIES = gql`
-  query GetCategories {
-    categories {
-      id
-      name
-      image
-      subCategories {
-        id
-        name
-        image
-      }
-    }
-  }
-`;
 
 export interface SubCategory {
   id: string;

@@ -9,55 +9,9 @@ import { gql, useMutation } from '@apollo/client';
 import { StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authorize } from 'react-native-app-auth';
+import { VERIFY_EMAIL, VERIFY_EMAIL_OTP, UNLINK_SOCIAL_MEDIA } from '../../graphql/mutations';
+import { UPDATE_USER, LINK_SOCIAL_MEDIA } from '../../graphql/queries';
 
-const VERIFY_EMAIL = gql`
-  mutation VerifyEmail($email: String!) {
-    verifyEmail(email: $email)
-  }
-`;
-
-const VERIFY_EMAIL_OTP = gql`
-  mutation VerifyEmailOTP($email: String!, $otp: String!) {
-    verifyEmailOTP(email: $email, otp: $otp)
-  }
-`;
-
-const UPDATE_USER = gql`
-  mutation UpdateUser($id: ID!, $input: UserInput!) {
-    updateUser(id: $id, input: $input) {
-      id
-      fullName
-      bio
-      budget
-      email
-      categoryIDs
-      subCategoryIDs
-      youtubeId
-      youtubeDisplay
-      instagramUsername
-      instagramDisplay
-      facebookId
-      facebookDisplay
-      xUsername
-      xDisplay
-    }
-  }
-`;
-
-const LINK_SOCIAL_MEDIA = gql`
-  mutation LinkSocialMedia($platform: String!, $authCode: String!) {
-    linkSocialMedia(platform: $platform, authCode: $authCode) {
-      platform
-      identifier
-    }
-  }
-`;
-
-const UNLINK_SOCIAL_MEDIA = gql`
-  mutation UnlinkSocialMedia($platform: String!) {
-    unlinkSocialMedia(platform: $platform)
-  }
-`;
 
 const oauthConfigs = {
   youtube: {

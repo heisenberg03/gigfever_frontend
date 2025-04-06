@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.secondary,
   },
   priceText: {
     color: 'white',

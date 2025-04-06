@@ -7,55 +7,15 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { useAuthStore } from '../../stores/authStore';
 import { useBookingStore } from '../../stores/bookingStore';
-import { GET_BOOKINGS } from '../../graphql/queries';
+import { GET_BOOKINGS, GET_INVITES } from '../../graphql/queries';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
 import { theme } from '../../theme';
+import { UPDATE_INVITE } from '../../graphql/mutations';
 
 // Define GraphQL queries and mutations
-const GET_INVITES = gql`
-  query GetInvites($userId: ID!) {
-    invites(userId: $userId) {
-      id
-      status
-      createdAt
-      updatedAt
-      event {
-        id
-        title
-        banner
-        dateTime
-        location {
-          address
-        }
-        type
-        budget {
-          min
-          max
-        }
-        host {
-          id
-          fullName
-          profilePicture
-        }
-      }
-    }
-  }
-`;
 
-const UPDATE_INVITE = gql`
-  mutation UpdateInviteStatus($inviteId: ID!, $status: String!) {
-    updateInviteStatus(inviteId: $inviteId, status: $status) {
-      id
-      status
-      updatedAt
-      event {
-        id
-        title
-      }
-    }
-  }
-`;
+
 
 // Define TypeScript interfaces
 interface Location {

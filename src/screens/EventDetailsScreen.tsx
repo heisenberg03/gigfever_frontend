@@ -26,123 +26,11 @@ import ReviewsModal from '../components/ReviewsModal';
 import { useAuthStore } from '../stores/authStore';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openInMaps } from '../utils/openInMaps';
-
-
-const GET_EVENT_DETAILS = gql`
-  query GetEventDetails($id: ID!) {
-    event(id: $id) {
-      id
-      title
-      banner
-      date
-      time
-      location {
-        lat
-        lng
-        address
-      }
-      type
-      categories
-      subcategories
-      description
-      budget { min max }
-      host { 
-        id 
-        fullName 
-        rating 
-        reviewsCount
-        pastEventsCount 
-        profilePicture
-      }
-      applications { 
-        id 
-        fullName 
-        status
-        artistType
-        location
-        artistRating
-        artistReviewCount
-        budget
-        categoryIDs
-        subCategoryIDs
-        profilePicture
-        username
-      }
-      confirmedArtist { 
-        id 
-        fullName
-        artistType
-        location
-        artistRating
-        artistReviewCount
-        budget
-        categoryIDs
-        subCategoryIDs
-        profilePicture
-        username
-      }
-      status
-      userApplicationStatus
-      isFavorite
-    }
-  }
-`;
-
-const APPLY_AS_ARTIST = gql`
-  mutation ApplyAsArtist($eventId: ID!) { 
-    applyAsArtist(eventId: $eventId)
-  }
-`;
-
-const WITHDRAW_APPLICATION = gql`
-  mutation WithdrawApplication($eventId: ID!) { 
-    withdrawApplication(eventId: $eventId) 
-  }
-`;
-
-const ACCEPT_ARTIST = gql`
-  mutation AcceptArtist($eventId: ID!, $artistId: ID!) {
-    acceptArtist(eventId: $eventId, artistId: $artistId) {
-      id
-      status
-      confirmedArtist {
-        id
-        fullName
-      }
-    }
-  }
-`;
-
-const REJECT_ARTIST = gql`
-  mutation RejectArtist($eventId: ID!, $artistId: ID!) {
-    rejectArtist(eventId: $eventId, artistId: $artistId) {
-      id
-      status
-    }
-  }
-`;
-
-const TOGGLE_FAVORITE = gql`
-  mutation ToggleFavoriteEvent($eventId: ID!) {
-    toggleFavoriteEvent(eventId: $eventId)
-  }
-`;
-
-const CANCEL_EVENT = gql`
-  mutation CancelEvent($eventId: ID!) {
-    cancelEvent(eventId: $eventId) {
-      id
-      status
-    }
-  }
-`;
-
-const DELETE_EVENT = gql`
-  mutation DeleteEvent($eventId: ID!) {
-    deleteEvent(eventId: $eventId)
-  }
-`;
-
+import { GET_EVENT_DETAILS } from '../graphql/queries';
+import {
+  APPLY_AS_ARTIST, WITHDRAW_APPLICATION, ACCEPT_ARTIST, REJECT_ARTIST,
+  TOGGLE_FAVORITE, CANCEL_EVENT, DELETE_EVENT
+} from '../graphql/mutations';
 
 type EventDetailsScreenRouteProp = RouteProp<RootStackParamList, 'EventDetails'>;
 type EventDetailsScreenNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -255,10 +143,10 @@ const EventDetailsScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-      <View style={[styles.container, {paddingTop: 0}]}>
+      <View style={[styles.container, { paddingTop: 0 }]}>
         {/* Animated Header */}
         <Animated.View style={[
-          styles.header, 
+          styles.header,
           {
             paddingTop: insets.top,
             paddingBottom: 8,
@@ -294,14 +182,14 @@ const EventDetailsScreen = () => {
               icon={event.isFavorite ? "heart" : "heart-outline"}
               size={24}
               iconColor={event.isFavorite ? "#FF4081" : "#333"}
-              style={{backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
               onPress={() => toggleFavorite({ variables: { eventId } })}
             />
-            <IconButton icon="share-variant" size={24} style={{backgroundColor: 'rgba(255, 255, 255, 0.8)' }} onPress={handleShare} />
+            <IconButton icon="share-variant" size={24} style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }} onPress={handleShare} />
             <Menu
               visible={menuVisible}
               onDismiss={() => setMenuVisible(false)}
-              anchor={<IconButton icon="dots-vertical" size={24} style={{backgroundColor: 'rgba(255, 255, 255, 0.8)' }} onPress={() => setMenuVisible(true)} />}
+              anchor={<IconButton icon="dots-vertical" size={24} style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }} onPress={() => setMenuVisible(true)} />}
               contentStyle={{ marginTop: Platform.OS === 'android' ? 40 : 0 }}
             >
               {isHost && <Menu.Item onPress={() => navigation.navigate('EditEvent', { eventId })} title="Edit" disabled={isEventCancelled} />}
@@ -315,7 +203,7 @@ const EventDetailsScreen = () => {
         <ScrollView
           ref={scrollViewRef}
           style={styles.scrollView}
-          contentContainerStyle={{paddingTop: 0}}
+          contentContainerStyle={{ paddingTop: 0 }}
           showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}
           onScroll={Animated.event(
@@ -377,31 +265,31 @@ const EventDetailsScreen = () => {
                             onPress={(id) => navigation.navigate('ArtistProfile', { artistId: id })}
                           >
                             <View style={styles.applicationActions}>
-                              <Button 
-                                mode="contained" 
-                                onPress={() => acceptArtist({ variables: { eventId, artistId: artist.id } })} 
-                                style={styles.acceptButton} 
-                                compact 
+                              <Button
+                                mode="contained"
+                                onPress={() => acceptArtist({ variables: { eventId, artistId: artist.id } })}
+                                style={styles.acceptButton}
+                                compact
                                 icon="check"
                                 labelStyle={{ textAlign: 'center' }}
                               >
                                 Accept
                               </Button>
-                              <Button 
-                                mode="outlined" 
-                                onPress={() => rejectArtist({ variables: { eventId, artistId: artist.id } })} 
-                                style={styles.rejectButton} 
-                                compact 
+                              <Button
+                                mode="outlined"
+                                onPress={() => rejectArtist({ variables: { eventId, artistId: artist.id } })}
+                                style={styles.rejectButton}
+                                compact
                                 icon="close"
                                 labelStyle={{ textAlign: 'center' }}
                               >
                                 Reject
                               </Button>
-                              <Button 
-                                mode="outlined" 
-                                onPress={() => navigation.navigate('ChatConversation', { userId: artist.id })} 
-                                style={styles.chatActionButton} 
-                                compact 
+                              <Button
+                                mode="outlined"
+                                onPress={() => navigation.navigate('ChatConversation', { userId: artist.id })}
+                                style={styles.chatActionButton}
+                                compact
                                 icon="message-outline"
                                 labelStyle={{ textAlign: 'center' }}
                               >
@@ -669,32 +557,32 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  applicationActions: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
+  applicationActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingTop: 12,
     marginTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
-    gap: 8 
+    gap: 8
   },
-  acceptButton: { 
-    backgroundColor: '#4CAF50', 
-    borderRadius: 8, 
+  acceptButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  rejectButton: { 
-    borderColor: '#F44336', 
-    borderRadius: 8, 
+  rejectButton: {
+    borderColor: '#F44336',
+    borderRadius: 8,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  chatActionButton: { 
-    borderColor: theme.colors.primary, 
-    borderRadius: 8, 
+  chatActionButton: {
+    borderColor: theme.colors.primary,
+    borderRadius: 8,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -707,7 +595,7 @@ const styles = StyleSheet.create({
   hostStats: { flexDirection: 'row', alignItems: 'center' },
   statPill: { marginRight: 8, backgroundColor: '#EEEEEE' },
   achievementPill: { backgroundColor: '#EEEEEE' },
-  hostActionRow: { flexDirection: 'row',gap:8, justifyContent: 'space-between', marginTop: 16, borderTopWidth: 1, borderTopColor: '#f0f0f0', paddingTop: 16 },
+  hostActionRow: { flexDirection: 'row', gap: 8, justifyContent: 'space-between', marginTop: 16, borderTopWidth: 1, borderTopColor: '#f0f0f0', paddingTop: 16 },
   reportHostButton: { borderColor: '#FF5252', flex: 1 },
   inviteButton: { marginTop: 16, backgroundColor: theme.colors.primary, borderRadius: 8, alignSelf: 'center', marginVertical: 16 },
   noApplicationsContainer: { padding: 24, backgroundColor: '#f8f8fa', borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#eaeaea', borderStyle: 'dashed' },
@@ -726,8 +614,8 @@ const styles = StyleSheet.create({
     padding: 8,
     alignItems: 'center'
   },
-  mapProviderButton: { 
-    flex: 1,  
+  mapProviderButton: {
+    flex: 1,
     marginRight: 8,
     borderColor: theme.colors.primary
   },

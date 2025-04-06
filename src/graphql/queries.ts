@@ -14,6 +14,21 @@ export const GET_CHAT_MESSAGES = gql`
   }
 `;
 
+export const GET_CATEGORIES = gql`
+  query GetCategories {
+    categories {
+      id
+      name
+      image
+      subCategories {
+        id
+        name
+        image
+      }
+    }
+  }
+`;
+
 export const GET_USER_PROFILE = gql`
   query GetUserProfile($userId: ID!) {
     user(id: $userId) {
@@ -59,56 +74,6 @@ export const GET_NOTIFICATIONS = gql`
 export const MARK_AS_READ = gql`
   mutation MarkMessageAsRead($messageId: ID!) {
     markMessageAsRead(messageId: $messageId)
-  }
-`;
-export const GET_ARTISTS = gql`
-  query GetArtists(
-    $search: String
-    $categoryId: ID
-    $subCategoryIds: [ID!]
-    $location: String
-    $minBudget: Int
-    $maxBudget: Int
-    $minRating: Float
-    $sortBy: String
-  ) {
-    artists(
-      search: $search
-      categoryId: $categoryId
-      subCategoryIds: $subCategoryIds
-      location: $location
-      minBudget: $minBudget
-      maxBudget: $maxBudget
-      minRating: $minRating
-      sortBy: $sortBy
-    ) {
-      id
-      phoneNumber
-      username
-      fullName
-      email
-      profilePicture
-      isArtist
-      bio
-      budget
-      location
-      artistType
-      categoryIDs
-      subCategoryIDs
-      artistRating
-      artistReviewCount
-      hostRating
-      hostReviewCount
-      pastBookings
-      youtubeDisplay
-      youtubeId
-      instagramDisplay
-      instagramUsername
-      facebookDisplay
-      facebookId
-      xDisplay
-      xUsername
-    }
   }
 `;
 
@@ -244,15 +209,6 @@ export const GET_EVENT_REVIEWS = gql`
   }
 `;
 
-export const GET_CATEGORIES = gql`
-  query GetCategories {
-    categories {
-      id
-      name
-    }
-  }
-`;
-
 export const GET_SUB_CATEGORIES = gql`
   query GetSubCategories {
     subCategories {
@@ -286,64 +242,6 @@ export const GET_USER = gql`
   }
 `;
 
-export const GET_BOOKINGS = gql`
-  query GetBookings($userId: ID!) {
-    bookings(userId: $userId) {
-      id
-      userId
-      event {
-        id
-        title
-        banner
-        dateTime
-        location {
-          address
-        }
-        host {
-          id
-          fullName
-          profilePicture
-        }
-        type
-        budget {
-          min
-          max
-        }
-        status
-      }
-      status
-      date
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-export const GET_EVENTS = gql`
-  query GetEvents($userId: ID!) {
-    events(userId: $userId) {
-      id
-      title
-      category
-      date
-      location
-      status
-      host { id displayName }
-      isDraft
-    }
-  }
-`;
-
-export const GET_INVITES = gql`
-  query GetInvites($userId: ID!) {
-    invites(userId: $userId) {
-      id
-      event { id title host { id displayName } }
-      status
-    }
-  }
-`;
-
 export const GET_PORTFOLIO = gql`
   query GetPortfolio($userId: ID!) {
     portfolio(userId: $userId) {
@@ -352,31 +250,6 @@ export const GET_PORTFOLIO = gql`
       mediaUrl
       thumbnail
       source
-    }
-  }
-`;
-
-export const CREATE_EVENT = gql`
-  mutation CreateEvent($input: EventInput!) {
-    createEvent(input: $input) {
-      id
-      title
-      category
-      date
-      location
-      status
-      host { id displayName }
-      isDraft
-    }
-  }
-`;
-
-export const UPDATE_INVITE = gql`
-  mutation UpdateInvite($inviteId: ID!, $status: String!) {
-    updateInvite(inviteId: $inviteId, status: $status) {
-      id
-      event { id title }
-      status
     }
   }
 `;
@@ -411,16 +284,7 @@ export const REMOVE_PORTFOLIO_ITEM = gql`
   }
 `;
 
-export const CANCEL_EVENT = gql`
-  mutation CancelEvent($eventId: ID!) {
-    cancelEvent(eventId: $eventId) {
-      id
-      status
-    }
-  }
-`;
-
-export const GET_EVENTS_WITH_FILTERS = gql`
+export const GET_EVENTS = gql`
   query GetEventsWithFilters(
     $search: String
     $categoryId: ID
@@ -547,6 +411,208 @@ export const GET_TOP_EVENTS = gql`
       applicationsCount
       isFavorite
       userApplicationStatus
+    }
+  }
+`;
+
+// GraphQL Mutation for Linking Social Media
+export const LINK_SOCIAL_MEDIA = gql`
+  mutation LinkSocialMedia($platform: String!, $authCode: String!) {
+    linkSocialMedia(platform: $platform, authCode: $authCode) {
+      platform
+      identifier
+    }
+  }
+`;
+
+export const GET_MY_EVENTS = gql`
+  query GetMyEvents($userId: ID!) {
+    events(userId: $userId) {
+      id
+      title
+      description
+      banner
+      dateTime
+      location {
+        lat
+        lng
+        address
+      }
+      status
+      type
+      eventType
+      budget {
+        min
+        max
+      }
+      category
+      subcategories
+      applicationsCount
+      confirmedArtist {
+        fullName
+        profilePicture
+      }
+    }
+  }
+`;
+
+export const GET_INVITES = gql`
+  query GetInvites($userId: ID!) {
+    invites(userId: $userId) {
+      id
+      status
+      createdAt
+      updatedAt
+      event {
+        id
+        title
+        banner
+        dateTime
+        location {
+          address
+        }
+        type
+        budget {
+          min
+          max
+        }
+        host {
+          id
+          fullName
+          profilePicture
+        }
+      }
+    }
+  }
+`;
+
+export const GET_BOOKINGS = gql`
+  query GetBookings($userId: ID!) {
+    bookings(userId: $userId) {
+      id
+      userId
+      event {
+        id
+        title
+        banner
+        dateTime
+        location {
+          address
+          lat
+          lng
+        }
+        host {
+          id
+          fullName
+          profilePicture
+        }
+        type
+        budget {
+          min
+          max
+        }
+        status
+      }
+      status
+      date
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_EVENT_DETAILS = gql`
+  query GetEventDetails($id: ID!) {
+    event(id: $id) {
+      id
+      title
+      banner
+      date
+      time
+      location {
+        lat
+        lng
+        address
+      }
+      type
+      categories
+      subcategories
+      description
+      budget { min max }
+      host { 
+        id 
+        fullName 
+        rating 
+        reviewsCount
+        pastEventsCount 
+        profilePicture
+      }
+      applications { 
+        id 
+        fullName 
+        status
+        artistType
+        location
+        artistRating
+        artistReviewCount
+        budget
+        categoryIDs
+        subCategoryIDs
+        profilePicture
+        username
+      }
+      confirmedArtist { 
+        id 
+        fullName
+        artistType
+        location
+        artistRating
+        artistReviewCount
+        budget
+        categoryIDs
+        subCategoryIDs
+        profilePicture
+        username
+      }
+      status
+      userApplicationStatus
+      isFavorite
+    }
+  }
+`;
+
+export const GET_ARTISTS = gql`
+  query GetArtists(
+    $search: String
+    $categoryId: ID
+    $subCategoryIds: [ID!]
+    $location: String
+    $minBudget: Int
+    $maxBudget: Int
+    $minRating: Float
+    $sortBy: String
+  ) {
+    artists(
+      search: $search
+      categoryId: $categoryId
+      subCategoryIds: $subCategoryIds
+      location: $location
+      minBudget: $minBudget
+      maxBudget: $maxBudget
+      minRating: $minRating
+      sortBy: $sortBy
+    ) {
+      id
+      fullName
+      username
+      artistType
+      location
+      artistRating
+      artistReviewCount
+      budget
+      categoryIDs
+      subCategoryIDs
+      profilePicture
     }
   }
 `;

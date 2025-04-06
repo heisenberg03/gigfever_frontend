@@ -89,6 +89,7 @@ export const useFetchNotifications = () => {
       console.log('Notification Fetch Error:', error.message);
       return;
     }
+    console.log('Notification Data:', data);
     if (data?.notifications) {
       fetchNotifications(data.notifications);
     }
