@@ -1,63 +1,175 @@
 // src/graphql/queries.ts
 import { gql } from '@apollo/client';
 
+// Fetch current user (cached client-side after login)
+export const GET_CURRENT_USER = gql`
+  query GetCurrentUser {
+    currentUser {
+      id
+      username
+      fullName
+      phone
+      email
+      profilePicture
+      location { id address city latitude longitude }
+      bio
+      budget
+      artistType
+      artistRating
+      artistReviewCount
+      hostBio
+      hostRating
+      hostReviewCount
+      categories { id name }
+      subcategories { id name }
+      youtubeId
+      youtubeDisplay
+      instagramUsername
+      instagramDisplay
+      facebookId
+      facebookDisplay
+      xUsername
+      xDisplay
+      isArtist
+    }
+  }
+`;
+
+// Fetch artists for listing
+export const GET_ARTISTS = gql`
+  query GetArtists(
+    $search: String
+    $categoryIds: [ID!]
+    $subcategoryIds: [ID!]
+    $locationId: ID
+    $minBudget: Float
+    $maxBudget: Float
+    $minRating: Float
+    $sortBy: String
+  ) {
+    artists(
+      search: $search
+      categoryIds: $categoryIds
+      subcategoryIds: $subcategoryIds
+      locationId: $locationId
+      minBudget: $minBudget
+      maxBudget: $maxBudget
+      minRating: $minRating
+      sortBy: $sortBy
+    ) {
+      id
+      username
+      fullName
+      profilePicture
+      location { city }
+      artistType
+      artistRating
+      artistReviewCount
+      categories { id name }
+      subcategories { id name }
+    }
+  }
+`;
+
+// Fetch artist profile
+export const GET_ARTIST_PROFILE = gql`
+  query GetArtistProfile($id: ID!) {
+    user(id: $id) {
+      id
+      username
+      fullName
+      profilePicture
+      location { id address city latitude longitude }
+      bio
+      budget
+      artistType
+      artistRating
+      artistReviewCount
+      categories { id name }
+      subcategories { id name }
+      youtubeId
+      youtubeDisplay
+      instagramUsername
+      instagramDisplay
+      facebookId
+      facebookDisplay
+      xUsername
+      xDisplay
+      isFavorite
+    }
+  }
+`;
+
+// Fetch portfolio
+export const GET_PORTFOLIO = gql`
+  query GetPortfolio($userId: ID!) {
+    portfolio(userId: $userId) {
+      id
+      mediaType
+      mediaUrl
+      thumbnail
+      source
+    }
+  }
+`;
+
+// Fetch chat conversations
+export const GET_CHAT_CONVERSATIONS = gql`
+  query GetChatConversations($userId: ID!) {
+    chatConversations(userId: $userId) {
+      id
+      user1 { id username }
+      user2 { id username }
+      lastMessageText
+      lastMessageTimestamp
+      lastMessageSender { id }
+      lastMessageIsRead
+    }
+  }
+`;
+
+// Fetch chat messages
 export const GET_CHAT_MESSAGES = gql`
-  query GetChatMessages($receiverId: ID!) {
-    chatMessages(receiverId: $receiverId) {
+  query GetChatMessages($conversationId: ID!) {
+    messages(conversationId: $conversationId) {
       id
-      content
+      text
       timestamp
-      senderId
-      receiverId
-      read
+      sender { id username }
+      isRead
     }
   }
 `;
 
-export const GET_CATEGORIES = gql`
-  query GetCategories {
-    categories {
+// Fetch favorite artists
+export const GET_FAVORITE_ARTISTS = gql`
+  query GetFavoriteArtists($userId: ID!) {
+    favoriteArtists(userId: $userId) {
       id
-      name
-      image
-      subCategories {
-        id
-        name
-        image
-      }
-    }
-  }
-`;
-
-export const GET_USER_PROFILE = gql`
-  query GetUserProfile($userId: ID!) {
-    user(id: $userId) {
-      id
+      username
       fullName
       profilePicture
-      isOnline
+      artistRating
+      artistReviewCount
     }
   }
 `;
 
-export const GET_CHAT_LIST = gql`
-  query GetChatList {
-    chatList {
+// Fetch favorite events
+export const GET_FAVORITE_EVENTS = gql`
+  query GetFavoriteEvents($userId: ID!) {
+    favoriteEvents(userId: $userId) {
       id
-      userId
-      fullName
-      profilePicture
-      lastMessage {
-        content
-        timestamp
-        senderId
-      }
-      unreadCount
-      isOnline
+      title
+      dateTime
+      venue
+      location { id address city }
+      host { id username }
     }
   }
 `;
 
+// Fetch notifications
 export const GET_NOTIFICATIONS = gql`
   query GetNotifications($userId: ID!) {
     notifications(userId: $userId) {
@@ -71,391 +183,7 @@ export const GET_NOTIFICATIONS = gql`
   }
 `;
 
-export const MARK_AS_READ = gql`
-  mutation MarkMessageAsRead($messageId: ID!) {
-    markMessageAsRead(messageId: $messageId)
-  }
-`;
-
-export const GET_FAVORITE_ARTISTS = gql`
-  query GetFavoriteArtists {
-    artists {
-      id
-      phoneNumber
-      username
-      fullName
-      email
-      profilePicture
-      isArtist
-      bio
-      budget
-      location
-      artistType
-      categoryIDs
-      subCategoryIDs
-      artistRating
-      artistReviewCount
-      hostRating
-      hostReviewCount
-      pastBookings
-      youtubeDisplay
-      youtubeId
-      instagramDisplay
-      instagramUsername
-      facebookDisplay
-      facebookId
-      xDisplay
-      xUsername
-    }
-  }
-`;
-
-export const GET_FAVORITE_EVENTS = gql`
-  query GetFavoriteEvents {
-    events {
-      id
-      title
-      description
-      banner
-      dateTime
-      location {
-        lat
-        lng
-        address
-      }
-      status
-      eventType
-      budget {
-        min
-        max
-      }
-      category
-      subcategories
-      host { 
-        id 
-        displayName 
-        profilePicture
-      }
-    }
-  }
-`;
-
-export const GET_ARTIST_PORTFOLIO = gql`
-  query GetArtistPortfolio($id: ID!) {
-    portfolio(userId: $id) {
-      id
-      mediaType
-      mediaUrl
-      thumbnail
-      source
-    }
-  }
-`;
-
-export const GET_ARTIST_REVIEWS = gql`
-  query GetArtistReviews($id: ID!) {
-    artist(id: $id) {
-      reviews {
-        id
-        rating
-        comment
-        reviewer { displayName }
-      }
-    }
-  }
-`;
-
-export const GET_APPLICATIONS = gql`query { applications { id event { id title } status } }`;
-export const GET_EVENTS_TO_APPLY = gql`query { events { id title date } }`;
-
-
-
-export const GET_EVENT_ARTISTS = gql`
-  query GetEventArtists($id: ID!) {
-    event(id: $id) {
-      artists {
-        id
-        displayName
-        profilePicture
-        categories
-        subcategories
-        portfolio { type url }
-        rating
-        reviewCount
-        pastBookings
-        youtubeDisplay
-        youtubeId
-        instagramDisplay
-        instagramUsername
-        facebookDisplay
-        facebookId
-        xDisplay
-        xUsername
-      }
-    }
-  }
-`;
-
-export const GET_EVENT_REVIEWS = gql`
-  query GetEventReviews($id: ID!) {
-    event(id: $id) {
-      reviews {
-        id
-        rating
-        comment
-        reviewer { displayName }
-      }
-    }
-  }
-`;
-
-export const GET_SUB_CATEGORIES = gql`
-  query GetSubCategories {
-    subCategories {
-      id
-      name
-    }
-  }
-`;
-
-export const GET_USER = gql`
-  query GetUser($id: ID!) {
-    user(id: $id) {
-      id
-      phoneNumber
-      fullName
-      displayName
-      isArtist
-      bio
-      budget
-      categories
-      subcategories
-      youtubeDisplay
-      youtubeId
-      instagramDisplay
-      instagramUsername
-      facebookDisplay
-      facebookId
-      xDisplay
-      xUsername
-    }
-  }
-`;
-
-export const GET_PORTFOLIO = gql`
-  query GetPortfolio($userId: ID!) {
-    portfolio(userId: $userId) {
-      id
-      mediaType
-      mediaUrl
-      thumbnail
-      source
-    }
-  }
-`;
-
-export const UPDATE_USER = gql`
-  mutation UpdateUser($id: ID!, $input: UserInput!) {
-    updateUser(id: $id, input: $input) {
-      id
-      bio
-      budget
-      categories
-      subcategories
-    }
-  }
-`;
-
-export const ADD_PORTFOLIO_ITEM = gql`
-  mutation AddPortfolioItem($userId: ID!, $input: PortfolioInput!) {
-    addPortfolioItem(userId: $userId, input: $input) {
-      id
-      mediaType
-      mediaUrl
-      thumbnail
-      source
-    }
-  }
-`;
-
-export const REMOVE_PORTFOLIO_ITEM = gql`
-  mutation RemovePortfolioItem($id: ID!) {
-    removePortfolioItem(id: $id)
-  }
-`;
-
-export const GET_EVENTS = gql`
-  query GetEventsWithFilters(
-    $search: String
-    $categoryId: ID
-    $subCategoryIds: [ID!]
-    $location: String
-    $minBudget: Int
-    $maxBudget: Int
-    $startDate: String
-    $endDate: String
-    $sortBy: String
-  ) {
-    events(
-      search: $search
-      categoryId: $categoryId
-      subCategoryIds: $subCategoryIds
-      location: $location
-      minBudget: $minBudget
-      maxBudget: $maxBudget
-      startDate: $startDate
-      endDate: $endDate
-      sortBy: $sortBy
-    ) {
-      id
-      title
-      description
-      banner
-      dateTime
-      location {
-        lat
-        lng
-        address
-      }
-      status
-      eventType
-      budget {
-        min
-        max
-      }
-      category
-      subcategories
-      host { 
-        id 
-        displayName 
-        profilePicture
-        rating
-        reviewsCount
-        pastEventsCount
-      }
-      applicationsCount
-      isFavorite
-      userApplicationStatus
-    }
-  }
-`;
-
-export const GET_TOP_CATEGORIES = gql`
-  query GetTopCategories {
-    categories {
-      id
-      name
-      image
-    }
-  }
-`;
-
-export const GET_TOP_ARTISTS = gql`
-  query GetTopArtists {
-    artists {
-      id
-      phoneNumber
-      username
-      fullName
-      email
-      profilePicture
-      isArtist
-      bio
-      budget
-      location
-      artistType
-      categoryIDs
-      subCategoryIDs
-      artistRating
-      artistReviewCount
-      hostRating
-      hostReviewCount
-      pastBookings
-      youtubeDisplay
-      youtubeId
-      instagramDisplay
-      instagramUsername
-      facebookDisplay
-      facebookId
-      xDisplay
-      xUsername
-    }
-  }
-`;
-
-export const GET_TOP_EVENTS = gql`
-  query GetTopEvents {
-    events {
-      id
-      title
-      banner
-      dateTime
-      location {
-        address
-        lat
-        lng
-      }
-      status
-      eventType
-      budget {
-        min
-        max
-      }
-      category
-      subcategories
-      host { 
-        id 
-        displayName 
-        profilePicture
-      }
-      applicationsCount
-      isFavorite
-      userApplicationStatus
-    }
-  }
-`;
-
-// GraphQL Mutation for Linking Social Media
-export const LINK_SOCIAL_MEDIA = gql`
-  mutation LinkSocialMedia($platform: String!, $authCode: String!) {
-    linkSocialMedia(platform: $platform, authCode: $authCode) {
-      platform
-      identifier
-    }
-  }
-`;
-
-export const GET_MY_EVENTS = gql`
-  query GetMyEvents($userId: ID!) {
-    events(userId: $userId) {
-      id
-      title
-      description
-      banner
-      dateTime
-      location {
-        lat
-        lng
-        address
-      }
-      status
-      type
-      eventType
-      budget {
-        min
-        max
-      }
-      category
-      subcategories
-      applicationsCount
-      confirmedArtist {
-        fullName
-        profilePicture
-      }
-    }
-  }
-`;
-
+// Fetch invites
 export const GET_INVITES = gql`
   query GetInvites($userId: ID!) {
     invites(userId: $userId) {
@@ -463,156 +191,18 @@ export const GET_INVITES = gql`
       status
       createdAt
       updatedAt
-      event {
-        id
-        title
-        banner
-        dateTime
-        location {
-          address
-        }
-        type
-        budget {
-          min
-          max
-        }
-        host {
-          id
-          fullName
-          profilePicture
-        }
-      }
+      event { id title dateTime }
     }
   }
 `;
 
-export const GET_BOOKINGS = gql`
-  query GetBookings($userId: ID!) {
-    bookings(userId: $userId) {
+// Fetch applications
+export const GET_APPLICATIONS = gql`
+  query GetApplications($userId: ID!) {
+    applications(userId: $userId) {
       id
-      userId
-      event {
-        id
-        title
-        banner
-        dateTime
-        location {
-          address
-          lat
-          lng
-        }
-        host {
-          id
-          fullName
-          profilePicture
-        }
-        type
-        budget {
-          min
-          max
-        }
-        status
-      }
+      event { id title }
       status
-      date
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-export const GET_EVENT_DETAILS = gql`
-  query GetEventDetails($id: ID!) {
-    event(id: $id) {
-      id
-      title
-      banner
-      date
-      time
-      location {
-        lat
-        lng
-        address
-      }
-      type
-      categories
-      subcategories
-      description
-      budget { min max }
-      host { 
-        id 
-        fullName 
-        rating 
-        reviewsCount
-        pastEventsCount 
-        profilePicture
-      }
-      applications { 
-        id 
-        fullName 
-        status
-        artistType
-        location
-        artistRating
-        artistReviewCount
-        budget
-        categoryIDs
-        subCategoryIDs
-        profilePicture
-        username
-      }
-      confirmedArtist { 
-        id 
-        fullName
-        artistType
-        location
-        artistRating
-        artistReviewCount
-        budget
-        categoryIDs
-        subCategoryIDs
-        profilePicture
-        username
-      }
-      status
-      userApplicationStatus
-      isFavorite
-    }
-  }
-`;
-
-export const GET_ARTISTS = gql`
-  query GetArtists(
-    $search: String
-    $categoryId: ID
-    $subCategoryIds: [ID!]
-    $location: String
-    $minBudget: Int
-    $maxBudget: Int
-    $minRating: Float
-    $sortBy: String
-  ) {
-    artists(
-      search: $search
-      categoryId: $categoryId
-      subCategoryIds: $subCategoryIds
-      location: $location
-      minBudget: $minBudget
-      maxBudget: $maxBudget
-      minRating: $minRating
-      sortBy: $sortBy
-    ) {
-      id
-      fullName
-      username
-      artistType
-      location
-      artistRating
-      artistReviewCount
-      budget
-      categoryIDs
-      subCategoryIDs
-      profilePicture
     }
   }
 `;

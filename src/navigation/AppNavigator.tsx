@@ -1,5 +1,5 @@
 // src/navigation/AppNavigator.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,6 +32,9 @@ import ChatListScreen from '../screens/ChatListScreen';
 import { User } from '../types';
 import ChatScreen from '../screens/ChatScreen';
 import CategoryDetailsScreen from '../screens/CategoryDetailsScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { client } from '../apollo/client';
+import { GET_CURRENT_USER } from '../graphql/queries';
 
 // Navigation Types
 export type RootStackParamList = {
@@ -187,11 +190,28 @@ const AuthStack = () => (
   </ErrorBoundary>
 );
 
+const loadToken = async () => {
+  try {
+    const token = await AsyncStorage.getItem('authToken');
+    if (token) {
+      useAuthStore.getState().setToken(token);
+      //  fetch currentUser
+      const { data } = await client.query({
+        query: GET_CURRENT_USER,
+      });
+      useAuthStore.getState().setUser(data.currentUser);
+    }
+  } catch (error) {
+    console.error('Failed to load token:', error);
+  }
+};
 // Root Navigator
 export default function AppNavigator() {
+  useEffect(() => {
+    loadToken();
+  }, []);
+
   const { isAuthenticated } = useAuthStore();
-  useFetchCategories();
-  useFetchNotifications();
 
   return (
     <ErrorBoundary>

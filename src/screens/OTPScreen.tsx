@@ -1,50 +1,35 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
+import { useMutation } from '@apollo/client';
+import { SIGN_IN_WITH_PHONE } from '../graphql/mutations';
 import { useAuthStore } from '../stores/authStore';
 
 const OTPScreen = ({ route, navigation }: any) => {
   const { phoneNumber } = route.params;
   const [otp, setOtp] = useState('');
+  const [signInWithPhone, { loading, error }] = useMutation(SIGN_IN_WITH_PHONE);
   const { authenticate } = useAuthStore();
 
   const handleVerifyOtp = async () => {
     try {
-      // Here you would normally make an API call to verify OTP
-      // For now, we'll simulate a successful verification
-      const mockToken = 'mock-jwt-token';
-      const mockUser = {
-        id: 'u1',
-        phone: '9783776837',
-        profilePicture: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
-        email:'dumjubmummy.jefhuowiucehbmy@email.som',
-        fullName: 'Test User',
-        username: 'Test',
-        isArtist: true,
-        bio: 'Event organizer with a passion for music.',
-        budget: 5000,
-        location: 'Mumbai',
-        artistType: 'band',
-        categoryIDs: ['1'],
-        artistRating: 4.5,
-        artistReviewCount: 10,
-        hostRating: 4.3,
-        hostReviewCount: 5,
-        subCategoryIDs: ['1','4'],
-        youtubeDisplay: true,
-        youtubeId: '1234567890',
-        instagramDisplay: true,
-        instagramUsername: 'testuser',
-        facebookDisplay: true,
-        facebookId: '1234567890',
-        xDisplay: true, 
-        xUsername: 'testuser',
+      const { data } = await signInWithPhone({
+        variables: { phone: phoneNumber, otp },
+      });
+      const { accessToken, refreshToken, user } = data.signInWithPhone;
+
+      // Normalize user data to match UserProfile interface
+      const normalizedUser = {
+        ...user,
+        categoryIDs: user.categoryIDs.map((cat: { id: string }) => cat.id),
+        subCategoryIDs: user.subCategoryIDs.map((sub: { id: string }) => sub.id),
+        location: user.location || undefined,
       };
 
-    authenticate(mockUser, mockToken);
-
-  } catch (error) {
-      console.error('OTP verification failed:', error);
+      authenticate(accessToken, refreshToken, normalizedUser);
+      navigation.navigate('Home');
+    } catch (err) {
+      console.error('OTP verification failed:', err);
     }
   };
 
@@ -60,7 +45,14 @@ const OTPScreen = ({ route, navigation }: any) => {
         keyboardType="numeric"
         placeholderTextColor="#888"
       />
-      <Button mode="contained" onPress={handleVerifyOtp} style={styles.button}>
+      {error && <Text style={styles.error}>{error.message}</Text>}
+      <Button
+        mode="contained"
+        onPress={handleVerifyOtp}
+        disabled={!otp || loading}
+        style={styles.button}
+        loading={loading}
+      >
         Verify OTP
       </Button>
     </View>
@@ -99,6 +91,11 @@ const styles = StyleSheet.create({
   button: {
     paddingVertical: 8,
     borderRadius: 8,
+  },
+  error: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 16,
   },
 });
 

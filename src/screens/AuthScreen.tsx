@@ -1,21 +1,30 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
-import { useAuthStore } from '../stores/authStore';
+import { useMutation } from '@apollo/client';
+import { SIGN_UP } from '../graphql/mutations';
 
 const AuthScreen = ({ navigation }: any) => {
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [signUp, { loading, error }] = useMutation(SIGN_UP);
 
-  const handleSendOtp = () => {
-    console.log('Sending OTP to', phoneNumber);
-    setOtpSent(true);
-    navigation.navigate('OTPScreen', { phoneNumber }); // Navigate to OTPScreen
+  const handleSendOtp = async () => {
+    try {
+      const { data } = await signUp({
+        variables: { phone: phoneNumber, username, fullName },
+      });
+      console.log('User signed up:', data.signUp);
+      navigation.navigate('OTPScreen', { phoneNumber });
+    } catch (err) {
+      console.error('Sign-up failed:', err);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign In</Text>
+      <Text style={styles.title}>Sign Up / Sign In</Text>
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
@@ -24,11 +33,27 @@ const AuthScreen = ({ navigation }: any) => {
         keyboardType="phone-pad"
         placeholderTextColor="#888"
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+        placeholderTextColor="#888"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Full Name"
+        value={fullName}
+        onChangeText={setFullName}
+        placeholderTextColor="#888"
+      />
+      {error && <Text style={styles.error}>{error.message}</Text>}
       <Button
         mode="contained"
         onPress={handleSendOtp}
-        disabled={!phoneNumber}
+        disabled={!phoneNumber || !username || !fullName || loading}
         style={styles.button}
+        loading={loading}
       >
         Send OTP
       </Button>
@@ -62,6 +87,11 @@ const styles = StyleSheet.create({
   button: {
     paddingVertical: 8,
     borderRadius: 8,
+  },
+  error: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 16,
   },
 });
 
